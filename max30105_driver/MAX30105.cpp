@@ -39,6 +39,23 @@ boolean MAX30105::begin(uint8_t i2caddr) {
 
 
 //
+// Die Temperature
+//
+float MAX30105::readTemperature() {
+  // Step 1: Config die temperature register to take 1 temperature sample
+  writeRegister8(_i2caddr, MAX30105_DIETEMPCONFIG, 0x01);
+  delay(100);
+
+  // Step 2: Read die temperature register (integer)
+  int8_t tempInt = readRegister8(_i2caddr, MAX30105_DIETEMPINT);
+  uint8_t tempFrac = readRegister8(_i2caddr, MAX30105_DIETEMPFRAC);  
+
+  // Step 3: Calculate temperature (datasheet pg. 23)
+  return (float)tempInt + ((float)tempFrac * 0.0625);
+}
+
+
+//
 // Device ID and Revision
 //
 uint8_t MAX30105::readPartID() {

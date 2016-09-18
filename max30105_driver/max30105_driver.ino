@@ -31,5 +31,12 @@ void loop() {
   digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);              // wait for a second
 
+
+  // Read die temperature
+  float temp = particleSensor.readTemperature();
+  Serial.print("Die Temperature: ");
+  Serial.print(temp, 2);
+  Serial.println(" deg C");
+  
   
 }

@@ -84,6 +84,16 @@ class MAX30105 {
 
   boolean begin(uint8_t i2caddr = MAX30105_ADDRESS);
 
+  // Configuration
+  void setActiveLEDs(boolean green, boolean red, boolean ir);
+
+  // Data Collection
+
+
+  // Proximity
+
+  // Die Temperature
+  float readTemperature();
 
   // Detecting ID/Revision
   uint8_t getRevisionID();
