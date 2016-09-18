@@ -1,7 +1,9 @@
 MAX30105 Air Particle Sensor Driver and Breakout Board
 ======
 
+Work-in-progress. <br>
 This is a driver and breakout board to explore the new MAX30105 Air Particle Sensor. <br>
+
 
 # Open Source
 

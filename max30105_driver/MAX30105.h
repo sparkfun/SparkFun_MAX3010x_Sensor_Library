@@ -40,11 +40,11 @@
 // Configration Registers
 #define MAX30105_FIFOCONFIG       0x08
 #define MAX30105_MODECONFIG       0x09
-#define MAX30105_SPO2CONFIG       0x0A    // Note, this seems like an error in the datasheet (pg. 11)
+#define MAX30105_PARTICLECONFIG   0x0A    // Note, sometimes listed as "SPO2" config in datasheet (pg. 11)
 #define MAX30105_LED1_PULSEAMP    0x0C
 #define MAX30105_LED2_PULSEAMP    0x0D
 #define MAX30105_LED3_PULSEAMP    0x0E
-#define MAX30105_LED_PROXAMP      0x10
+#define MAX30105_LED_PROX_AMP     0x10
 #define MAX30105_MULTILEDCONFIG1  0x11
 #define MAX30105_MULTILEDCONFIG2  0x12
 
@@ -64,15 +64,37 @@
 //
 // MAX30105 Commands
 //
+#define MAX30105_MODE_REDONLY       0x02
+#define MAX30105_MODE_REDIRONLY     0x03
+#define MAX30105_MODE_MULTILED      0x07
 
-// TODO
+// Particle sensing configuration commands (pgs 19-20)
+#define MAX30105_ADCRANGE_MASK      0x9F
+#define MAX30105_ADCRANGE_2048      0x00
+#define MAX30105_ADCRANGE_4096      0x20
+#define MAX30105_ADCRANGE_8192      0x40
+#define MAX30105_ADCRANGE_16384     0x60
 
+#define MAX30105_SAMPLERATE_MASK    0xE3
+#define MAX30105_SAMPLERATE_50      0x00
+#define MAX30105_SAMPLERATE_100     0x04
+#define MAX30105_SAMPLERATE_200     0x08
+#define MAX30105_SAMPLERATE_400     0x0C
+#define MAX30105_SAMPLERATE_800     0x10
+#define MAX30105_SAMPLERATE_1000    0x14
+#define MAX30105_SAMPLERATE_1600    0x18
+#define MAX30105_SAMPLERATE_3200    0x1C
+
+#define MAX30105_PULSEWIDTH_MASK    0xFC
+#define MAX30105_PULSEWIDTH_69      0x00
+#define MAX30105_PULSEWIDTH_188     0x01
+#define MAX30105_PULSEWIDTH_215     0x02
+#define MAX30105_PULSEWIDTH_411     0x03
 
 //
 // MAX30105 Other Defines
 //
 #define MAX_30105_EXPECTEDPARTID  0x15
-
 
 //
 // Driver Class Definition
@@ -85,12 +107,28 @@ class MAX30105 {
   boolean begin(uint8_t i2caddr = MAX30105_ADDRESS);
 
   // Configuration
-  void setActiveLEDs(boolean green, boolean red, boolean ir);
+  void softReset();
 
+  void setLEDMode(uint8_t mode);
+
+  void setADCRange(uint8_t adcRange);
+  void setSampleRate(uint8_t sampleRate);
+  void setPulseWidth(uint8_t pulseWidth);
+
+  void setPulseAmplitudeRed(uint8_t value);
+  void setPulseAmplitudeIR(uint8_t value);
+  void setPulseAmplitudeGreen(uint8_t value);
+  void setPulseAmplitudeProximity(uint8_t value);
+
+  void setProximityThreshold(uint8_t threshMSB);
+
+  // TODO: Multi-led configuration mode (page 22)
+  
+  
   // Data Collection
 
-
-  // Proximity
+  // TODO: Interrupt, FIFO configuration, FIFO reading
+  
 
   // Die Temperature
   float readTemperature();
