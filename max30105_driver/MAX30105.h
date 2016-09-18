@@ -69,10 +69,38 @@
 
 
 //
+// MAX30105 Other Defines
+//
+#define MAX_30105_EXPECTEDPARTID  0x15
+
+
+//
 // Driver Class Definition
 //
 
-// TODO
+class MAX30105 {
+ public: 
+  MAX30105(void);
+
+  boolean begin(uint8_t i2caddr = MAX30105_ADDRESS);
+
+
+  // Detecting ID/Revision
+  uint8_t getRevisionID();
+  uint8_t readPartID();  
+
+  // Low-level I2C communication
+  uint8_t readRegister8(uint8_t address, uint8_t reg);
+  void writeRegister8(uint8_t address, uint8_t reg, uint8_t value);
+
+  
+ private:
+  uint8_t _i2caddr;
+  uint8_t revisionID;    
+
+  void readRevisionID();
+  
+};
 
 
 

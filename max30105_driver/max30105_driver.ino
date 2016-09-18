@@ -1,19 +1,8 @@
-
+// MAX30105 driver usage example (work in progress)
 
 #include <Wire.h>
-#define MAX30105_ADDRESS  0x57
-
-uint8_t readRegister8(uint8_t address, uint8_t reg) {
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.endTransmission(false);
-  Wire.requestFrom(address, 1);   // Request 1 byte
-  return ( Wire.read() ); 
-}
-
-
-
-
+#include "MAX30105.h"
+MAX30105 particleSensor = MAX30105();
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -23,7 +12,15 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Initializing...");
 
-  Wire.begin();
+  // Initialize sensor
+  if (!particleSensor.begin()) {
+    Serial.println("MAX30105 was not found.  Please check wiring/power. "); 
+    while(1);
+  }
+  Serial.print("MAX30105 found. (Revision ID = ");
+  Serial.print(particleSensor.getRevisionID());
+  Serial.println(")");
+  
   
 }
 
@@ -34,12 +31,5 @@ void loop() {
   digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);              // wait for a second
 
-  uint8_t id = readRegister8(MAX30105_ADDRESS, 0xFF);
-  uint8_t rev = readRegister8(MAX30105_ADDRESS, 0xFE);
-  Serial.print("ID: ");
-  Serial.print(id);
-  Serial.print("  REV: "); 
-  Serial.println(rev);
-  
   
 }
