@@ -31,6 +31,11 @@ boolean MAX30105::begin(uint8_t i2caddr) {
   // Populate revision ID
   readRevisionID();
 
+  //Enable the reading of the three LEDs
+  //enableSlot(1, SLOT_RED_LED);
+  //enableSlot(2, SLOT_GREEN_LED);
+  //enableSlot(3, SLOT_IR_LED);
+
   return true;
 }
 
@@ -161,6 +166,39 @@ void MAX30105::setProximityThreshold(uint8_t threshMSB) {
   // The threshMSB signifies only the 8 most significant-bits of the ADC count.
   // See datasheet, page 24.
   writeRegister8(_i2caddr, MAX30105_PROXINTTHRESH, threshMSB);
+}
+
+//Given a slot number assign a thing to it
+//Devices are SLOT_RED_LED or SLOT_RED_PILOT (proximity)
+//Assigning a SLOT_RED_LED will pulse LED
+//Assigning a SLOT_RED_PILOT will ??
+void MAX30105::enableSlot(uint8_t slotNumber, uint8_t device) {
+
+  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
+  uint8_t originalContents;
+
+  //If we are dealing with Slots 1 or 2, we need register Config1 0x11
+  if(slotNumber == 1 || slotNumber == 2) originalContents = readRegister8(_i2caddr, MAX30105_MULTILEDCONFIG1);
+  else originalContents = readRegister8(_i2caddr, MAX30105_MULTILEDCONFIG2); //Else Config2
+
+  //If we're dealing with slot 1 or 3, our mask is 0x07
+  if(slotNumber == 1 || slotNumber == 3) originalContents = originalContents & MAX30105_SLOT1_MASK;
+  else originalContents = originalContents & MAX30105_SLOT2_MASK; //Else mask is 0x70
+
+  //If we're in slots 2 or 4, we need to shift our thing
+  if(slotNumber == 2 || slotNumber == 4) device <<= 4; //Line this thing up with its slot 
+
+  originalContents |= device; //Mask in the thing we want to change
+
+  // Step 2: Change contents
+  if(slotNumber == 1 || slotNumber == 2) writeRegister8(_i2caddr, MAX30105_MULTILEDCONFIG1, originalContents);
+  else writeRegister8(_i2caddr, MAX30105_MULTILEDCONFIG2, originalContents);
+}
+
+//Clears all slot assignments
+void MAX30105::disableSlots(void) {
+  writeRegister8(_i2caddr, MAX30105_MULTILEDCONFIG1, 0);
+  writeRegister8(_i2caddr, MAX30105_MULTILEDCONFIG2, 0);
 }
 
 //

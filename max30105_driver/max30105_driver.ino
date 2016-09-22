@@ -27,6 +27,17 @@ void setup() {
   startTime = millis();
   particleSensor.softReset();
 
+  particleSensor.disableSlots(); //Disable all LED assignments in all slots
+
+  //Per datasheet, slots should be assigned in order (i.e., SLOT2 should not be 
+  //enabled if SLOT1 is not enabled)
+
+  //Enable the reading of the three LEDs
+  particleSensor.enableSlot(1, SLOT_RED_LED);   
+  particleSensor.enableSlot(2, SLOT_GREEN_LED);
+  particleSensor.enableSlot(3, SLOT_IR_LED);
+
+
 }
 
 // the loop function runs over and over again forever

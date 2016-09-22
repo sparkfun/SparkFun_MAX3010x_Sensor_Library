@@ -91,6 +91,19 @@
 #define MAX30105_PULSEWIDTH_215     0x02
 #define MAX30105_PULSEWIDTH_411     0x03
 
+//Multi-LED Mode configuration (pg 22)
+#define MAX30105_SLOT1_MASK         0xF8
+#define MAX30105_SLOT2_MASK         0x8F
+
+#define SLOT_NONE          0x00
+#define SLOT_RED_LED       0x01
+#define SLOT_GREEN_LED     0x02
+#define SLOT_IR_LED        0x03
+#define SLOT_NONE_PILOT    0x04
+#define SLOT_RED_PILOT     0x05
+#define SLOT_GREEN_PILOT   0x06
+#define SLOT_IR_PILOT      0x07
+
 //
 // MAX30105 Other Defines
 //
@@ -124,8 +137,9 @@ class MAX30105 {
 
   void setProximityThreshold(uint8_t threshMSB);
 
-  // TODO: Multi-led configuration mode (page 22)
-  
+  //Multi-led configuration mode (page 22)
+  void enableSlot(uint8_t slotNumber, uint8_t device); //Given slot number, assign a device to slot
+  void disableSlots(void);
   
   // Data Collection
 
