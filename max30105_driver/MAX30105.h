@@ -108,6 +108,8 @@ class MAX30105 {
 
   // Configuration
   void softReset();
+  void shutDown(); 
+  void wakeUp(); 
 
   void setLEDMode(uint8_t mode);
 
@@ -132,6 +134,7 @@ class MAX30105 {
 
   // Die Temperature
   float readTemperature();
+  float readTemperatureF();
 
   // Detecting ID/Revision
   uint8_t getRevisionID();
