@@ -129,13 +129,13 @@ void MAX30105::enableSlot(uint8_t slotNumber, uint8_t device) {
       bitMask(MAX30105_MULTILEDCONFIG1, MAX30105_SLOT1_MASK, device);
       break;
     case(2):
-      bitMask(MAX30105_MULTILEDCONFIG1, MAX30105_SLOT2_MASK, device << 8);
+      bitMask(MAX30105_MULTILEDCONFIG1, MAX30105_SLOT2_MASK, device << 4);
       break;
     case(3):
       bitMask(MAX30105_MULTILEDCONFIG2, MAX30105_SLOT3_MASK, device);
       break;
     case(4):
-      bitMask(MAX30105_MULTILEDCONFIG2, MAX30105_SLOT4_MASK, device << 8);
+      bitMask(MAX30105_MULTILEDCONFIG2, MAX30105_SLOT4_MASK, device << 4);
       break;
     default:
       //Shouldn't be here!
@@ -174,6 +174,12 @@ void MAX30105::enableFIFORollover(void) {
 //Disable roll over if FIFO over flows
 void MAX30105::disableFIFORollover(void) {
   bitMask(MAX30105_FIFOCONFIG, MAX30105_ROLLOVER_MASK, MAX30105_ROLLOVER_DISABLE);
+}
+
+//Set number of samples to trigger the almost full interrupt (Page 18)
+//Note it is reverse: 0x00 is 32 samples, 0x0F is 17 samples
+void MAX30105::setFIFOAlmostFull(uint8_t numberOfSamples) {
+  bitMask(MAX30105_FIFOCONFIG, MAX30105_A_FULL_MASK, numberOfSamples);
 }
 
 //

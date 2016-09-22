@@ -37,7 +37,7 @@
 #define MAX30105_FIFOREADPTR      0x06
 #define MAX30105_FIFODATA         0x07
 
-// Configration Registers
+// Configuration Registers
 #define MAX30105_FIFOCONFIG       0x08
 #define MAX30105_MODECONFIG       0x09
 #define MAX30105_PARTICLECONFIG   0x0A    // Note, sometimes listed as "SPO2" config in datasheet (pg. 11)
@@ -170,14 +170,17 @@ class MAX30105 {
   
   // Data Collection
 
-  // TODO: Interrupt, FIFO configuration, FIFO reading
-  void setFIFOAverage(uint8_t value);
+  // TODO: Interrupt, FIFO reading
+  
+  //FIFO Configuration (page 18)
+  void setFIFOAverage(uint8_t samples);
+  void enableFIFORollover();
+  void disableFIFORollover();
+  void setFIFOAlmostFull(uint8_t samples);
   
   //uint8_t getReadPointer();
   //uint8_t getWritePointer();
   void clearFIFO(void);
-  void enableFIFORollover();
-  void disableFIFORollover();
 
   // Die Temperature
   float readTemperature();
