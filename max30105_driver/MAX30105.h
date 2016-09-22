@@ -64,6 +64,31 @@
 //
 // MAX30105 Commands
 //
+
+// FIFO configuration commands (pgs 18)
+#define MAX30105_SAMPLEAVG_MASK     0x1F
+#define MAX30105_SAMPLEAVG_1        0x00
+#define MAX30105_SAMPLEAVG_2        0x20
+#define MAX30105_SAMPLEAVG_4        0x40
+#define MAX30105_SAMPLEAVG_8        0x60
+#define MAX30105_SAMPLEAVG_16       0x80
+#define MAX30105_SAMPLEAVG_32       0xA0
+
+#define MAX30105_ROLLOVER_MASK      0xEF
+#define MAX30105_ROLLOVER_ENABLE    0x10
+#define MAX30105_ROLLOVER_DISABLE   0x00
+
+#define MAX30105_A_FULL_MASK        0xF0
+
+// Mode configuration commands (page 19)
+#define MAX30105_SHUTDOWN_MASK      0x7F
+#define MAX30105_SHUTDOWN           0x80
+#define MAX30105_WAKEUP             0x00
+
+#define MAX30105_RESET_MASK         0xBF
+#define MAX30105_RESET              0x40
+
+#define MAX30105_MODE_MASK          0xF8
 #define MAX30105_MODE_REDONLY       0x02
 #define MAX30105_MODE_REDIRONLY     0x03
 #define MAX30105_MODE_MULTILED      0x07
@@ -94,6 +119,8 @@
 //Multi-LED Mode configuration (pg 22)
 #define MAX30105_SLOT1_MASK         0xF8
 #define MAX30105_SLOT2_MASK         0x8F
+#define MAX30105_SLOT3_MASK         0xF8
+#define MAX30105_SLOT4_MASK         0x8F
 
 #define SLOT_NONE          0x00
 #define SLOT_RED_LED       0x01
@@ -144,7 +171,13 @@ class MAX30105 {
   // Data Collection
 
   // TODO: Interrupt, FIFO configuration, FIFO reading
+  void setFIFOAverage(uint8_t value);
   
+  //uint8_t getReadPointer();
+  //uint8_t getWritePointer();
+  void clearFIFO(void);
+  void enableFIFORollover();
+  void disableFIFORollover();
 
   // Die Temperature
   float readTemperature();
@@ -161,9 +194,11 @@ class MAX30105 {
   
  private:
   uint8_t _i2caddr;
-  uint8_t revisionID;    
+  uint8_t revisionID; 
 
   void readRevisionID();
+
+  void bitMask(uint8_t reg, uint8_t mask, uint8_t thing);
   
 };
 

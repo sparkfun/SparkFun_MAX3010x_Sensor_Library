@@ -44,11 +44,7 @@ boolean MAX30105::begin(uint8_t i2caddr) {
 //
 
 void MAX30105::softReset() {
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
-  uint8_t originalContents = readRegister8(_i2caddr, MAX30105_MODECONFIG);
-
-  // Soft reset using the internal reset function (datasheet pg. 19)
-  writeRegister8(_i2caddr, MAX30105_MODECONFIG, originalContents | 0x40);
+  bitMask(MAX30105_MODECONFIG, MAX30105_RESET_MASK, MAX30105_RESET);
 
   // Poll for bit to clear, reset is then complete
   // Timeout after 100ms
@@ -56,7 +52,7 @@ void MAX30105::softReset() {
   while (millis() - startTime < 100)
   {
     uint8_t response = readRegister8(_i2caddr, MAX30105_MODECONFIG);
-    if ((response & 0x40) == 0) break; //We're done!
+    if ((response & MAX30105_RESET) == 0) break; //We're done!
     delay(1); //Let's not over burden the I2C bus
   }
 }
@@ -65,83 +61,35 @@ void MAX30105::shutDown() {
   // Put IC into low power mode (datasheet pg. 19)
   // During shutdown the IC will continue to respond to I2C commands but will
   // not update with or take new readings (such as temperature)
-
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
-  uint8_t originalContents = readRegister8(_i2caddr, MAX30105_MODECONFIG);
-
-  // Step 2: Change contents
-  writeRegister8(_i2caddr, MAX30105_MODECONFIG, originalContents | 0x80);
+  bitMask(MAX30105_MODECONFIG, MAX30105_SHUTDOWN_MASK, MAX30105_SHUTDOWN);
 }
 
 void MAX30105::wakeUp() {
   // Pull IC out of low power mode (datasheet pg. 19)
-
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
-  uint8_t originalContents = readRegister8(_i2caddr, MAX30105_MODECONFIG);
-
-  // Step 2: Change contents
-  writeRegister8(_i2caddr, MAX30105_MODECONFIG, originalContents & 0x7F);
+  bitMask(MAX30105_MODECONFIG, MAX30105_SHUTDOWN_MASK, MAX30105_WAKEUP);
 }
-
 
 void MAX30105::setLEDMode(uint8_t mode) {
   // Set which LEDs are used for sampling -- Red only, RED+IR only, or custom.
   // See datasheet, page 19
-  // Note, this code is not currently shutdown aware. (If MAX30105_MODECONFIG is in SHDN, this would bring it out of shutdown)
-
-  switch (mode) {
-    case (MAX30105_MODE_REDONLY):
-      writeRegister8(_i2caddr, MAX30105_MODECONFIG, MAX30105_MODE_REDONLY);
-      break;
-
-    case (MAX30105_MODE_REDIRONLY):
-      writeRegister8(_i2caddr, MAX30105_MODECONFIG, MAX30105_MODE_REDIRONLY);
-      break;
-
-    case (MAX30105_MODE_MULTILED):
-      writeRegister8(_i2caddr, MAX30105_MODECONFIG, MAX30105_MODE_MULTILED);
-      break;
-
-    default:
-      // this should never happen
-      break;
-  }
+  bitMask(MAX30105_MODECONFIG, MAX30105_MODE_MASK, mode);
 }
 
 
 void MAX30105::setADCRange(uint8_t adcRange) {
   // adcRange: one of MAX30105_ADCRANGE_2048, _4096, _8192, _16384
-
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
-  uint8_t originalContents = readRegister8(_i2caddr, MAX30105_PARTICLECONFIG);
-  originalContents = originalContents & MAX30105_ADCRANGE_MASK;
-
-  // Step 2: Change contents
-  writeRegister8(_i2caddr, MAX30105_PARTICLECONFIG, originalContents | adcRange);
+  bitMask(MAX30105_PARTICLECONFIG, MAX30105_ADCRANGE_MASK, adcRange);
 }
 
 void MAX30105::setSampleRate(uint8_t sampleRate) {
   // sampleRate: one of MAX30105_SAMPLERATE_50, _100, _200, _400, _800, _1000, _1600, _3200
-
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
-  uint8_t originalContents = readRegister8(_i2caddr, MAX30105_PARTICLECONFIG);
-  originalContents = originalContents & MAX30105_SAMPLERATE_MASK;
-
-  // Step 2: Change contents
-  writeRegister8(_i2caddr, MAX30105_PARTICLECONFIG, originalContents | sampleRate);
+  bitMask(MAX30105_PARTICLECONFIG, MAX30105_SAMPLERATE_MASK, sampleRate);
 }
 
 void MAX30105::setPulseWidth(uint8_t pulseWidth) {
   // pulseWidth: one of MAX30105_PULSEWIDTH_69, _188, _215, _411
-
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
-  uint8_t originalContents = readRegister8(_i2caddr, MAX30105_PARTICLECONFIG);
-  originalContents = originalContents & MAX30105_PULSEWIDTH_MASK;
-
-  // Step 2: Change contents
-  writeRegister8(_i2caddr, MAX30105_PARTICLECONFIG, originalContents | pulseWidth);
+  bitMask(MAX30105_PARTICLECONFIG, MAX30105_PULSEWIDTH_MASK, pulseWidth);
 }
-
 
 // NOTE: Amplitude values: 0x00 = 0mA, 0x7F = 25.4mA, 0xFF = 50mA (typical)
 // See datasheet, page 21
@@ -174,25 +122,25 @@ void MAX30105::setProximityThreshold(uint8_t threshMSB) {
 //Assigning a SLOT_RED_PILOT will ??
 void MAX30105::enableSlot(uint8_t slotNumber, uint8_t device) {
 
-  // Step 1: Grab current register context, and zero-out the portions of the register we're interested in
   uint8_t originalContents;
 
-  //If we are dealing with Slots 1 or 2, we need register Config1 0x11
-  if(slotNumber == 1 || slotNumber == 2) originalContents = readRegister8(_i2caddr, MAX30105_MULTILEDCONFIG1);
-  else originalContents = readRegister8(_i2caddr, MAX30105_MULTILEDCONFIG2); //Else Config2
-
-  //If we're dealing with slot 1 or 3, our mask is 0x07
-  if(slotNumber == 1 || slotNumber == 3) originalContents = originalContents & MAX30105_SLOT1_MASK;
-  else originalContents = originalContents & MAX30105_SLOT2_MASK; //Else mask is 0x70
-
-  //If we're in slots 2 or 4, we need to shift our thing
-  if(slotNumber == 2 || slotNumber == 4) device <<= 4; //Line this thing up with its slot 
-
-  originalContents |= device; //Mask in the thing we want to change
-
-  // Step 2: Change contents
-  if(slotNumber == 1 || slotNumber == 2) writeRegister8(_i2caddr, MAX30105_MULTILEDCONFIG1, originalContents);
-  else writeRegister8(_i2caddr, MAX30105_MULTILEDCONFIG2, originalContents);
+  switch(slotNumber) {
+    case(1):
+      bitMask(MAX30105_MULTILEDCONFIG1, MAX30105_SLOT1_MASK, device);
+      break;
+    case(2):
+      bitMask(MAX30105_MULTILEDCONFIG1, MAX30105_SLOT2_MASK, device << 8);
+      break;
+    case(3):
+      bitMask(MAX30105_MULTILEDCONFIG2, MAX30105_SLOT3_MASK, device);
+      break;
+    case(4):
+      bitMask(MAX30105_MULTILEDCONFIG2, MAX30105_SLOT4_MASK, device << 8);
+      break;
+    default:
+      //Shouldn't be here!
+      break;
+  }
 }
 
 //Clears all slot assignments
@@ -204,6 +152,29 @@ void MAX30105::disableSlots(void) {
 //
 // Data Collection
 //
+
+//Set sample average (Table 3, Page 18)
+void MAX30105::setFIFOAverage(uint8_t numberOfSamples) {
+  bitMask(MAX30105_FIFOCONFIG, MAX30105_SAMPLEAVG_MASK, numberOfSamples);
+}
+
+//Resets all points to start in a known state
+//Page 15 recommends clearing FIFO before beginning a read
+void MAX30105::clearFIFO(void) {
+  writeRegister8(_i2caddr, MAX30105_FIFOWRITEPTR, 0);
+  writeRegister8(_i2caddr, MAX30105_FIFOOVERFLOW, 0);
+  writeRegister8(_i2caddr, MAX30105_FIFOREADPTR, 0);
+}
+
+//Enable roll over if FIFO over flows
+void MAX30105::enableFIFORollover(void) {
+  bitMask(MAX30105_FIFOCONFIG, MAX30105_ROLLOVER_MASK, MAX30105_ROLLOVER_ENABLE);
+}
+
+//Disable roll over if FIFO over flows
+void MAX30105::disableFIFORollover(void) {
+  bitMask(MAX30105_FIFOCONFIG, MAX30105_ROLLOVER_MASK, MAX30105_ROLLOVER_DISABLE);
+}
 
 //
 // Die Temperature
@@ -257,6 +228,19 @@ uint8_t MAX30105::getRevisionID() {
   return revisionID;
 }
 
+
+//Given a register, read it, mask it, and then set the thing
+void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
+{
+  // Grab current register context 
+  uint8_t originalContents = readRegister8(_i2caddr, reg);
+
+  // Zero-out the portions of the register we're interested in
+  originalContents = originalContents & mask; 
+
+  // Change contents
+  writeRegister8(_i2caddr, reg, originalContents | thing);
+}
 
 //
 // Low-level I2C Communication
