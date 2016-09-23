@@ -197,9 +197,9 @@ class MAX30105 {
   // Data Collection
 
   //Interrupta (page 13, 14)
-  uint8_t getINT1(void);
-  uint8_t getINT2(void);
-  void enableAFULL(void);
+  uint8_t getINT1(void); //Returns the main interrupt group
+  uint8_t getINT2(void); //Returns the temp ready interrupt
+  void enableAFULL(void); //Enable/disable individual interrupts
   void disableAFULL(void);
   void enableDATARDY(void);
   void disableDATARDY(void);
@@ -219,7 +219,10 @@ class MAX30105 {
   //FIFO Reading
   uint8_t getWritePointer(void);
   uint8_t getReadPointer(void);
-  void clearFIFO(void);
+  void clearFIFO(void); //Sets the read/write pointers to zero
+
+  //Proximity Mode Interrupt Threshold
+  void setPROXINTTHRESH(uint8_t val);
 
   // Die Temperature
   float readTemperature();
@@ -235,7 +238,6 @@ class MAX30105 {
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);
   void writeRegister8(uint8_t address, uint8_t reg, uint8_t value);
-
   
  private:
   uint8_t _i2caddr;

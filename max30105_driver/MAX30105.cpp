@@ -275,6 +275,11 @@ float MAX30105::readTemperatureF() {
   return (temp);
 }
 
+// Set the PROX_INT_THRESHold
+void MAX30105::setPROXINTTHRESH(uint8_t val) {
+  writeRegister8(_i2caddr, MAX30105_PROXINTTHRESH, val);
+}
+
 
 //
 // Device ID and Revision
