@@ -70,7 +70,28 @@
 // MAX30105 Commands
 //
 
-// FIFO configuration commands (pgs 18)
+// Interrupt configuration (pg 13, 14)
+#define MAX30105_INT_A_FULL_MASK    (byte)~0b10000000
+#define MAX30105_INT_A_FULL_ENABLE  0x80
+#define MAX30105_INT_A_FULL_DISABLE 0x00
+
+#define MAX30105_INT_DATA_RDY_MASK  (byte)~0b01000000
+#define MAX30105_INT_DATA_RDY_ENABLE  0x40
+#define MAX30105_INT_DATA_RDY_DISABLE 0x00
+
+#define MAX30105_INT_ALC_OVF_MASK  (byte)~0b00100000
+#define MAX30105_INT_ALC_OVF_ENABLE  0x20
+#define MAX30105_INT_ALC_OVF_DISABLE 0x00
+
+#define MAX30105_INT_PROX_INT_MASK  (byte)~0b00010000
+#define MAX30105_INT_PROX_INT_ENABLE  0x10
+#define MAX30105_INT_PROX_INT_DISABLE 0x00
+
+#define MAX30105_INT_DIE_TEMP_RDY_MASK  (byte)~0b00000010
+#define MAX30105_INT_DIE_TEMP_RDY_ENABLE  0x02
+#define MAX30105_INT_DIE_TEMP_RDY_DISABLE 0x00
+
+// FIFO configuration commands (pg 18)
 #define MAX30105_SAMPLEAVG_MASK     (byte)~0b11100000
 #define MAX30105_SAMPLEAVG_1        0x00
 #define MAX30105_SAMPLEAVG_2        0x20
@@ -175,8 +196,20 @@ class MAX30105 {
   
   // Data Collection
 
-  // TODO: Interrupt, FIFO reading
-  
+  //Interrupta (page 13, 14)
+  uint8_t getINT1(void);
+  uint8_t getINT2(void);
+  void enableAFULL(void);
+  void disableAFULL(void);
+  void enableDATARDY(void);
+  void disableDATARDY(void);
+  void enableALCOVF(void);
+  void disableALCOVF(void);
+  void enablePROXINT(void);
+  void disablePROXINT(void);
+  void enableDIETEMPRDY(void);
+  void disableDIETEMPRDY(void);
+
   //FIFO Configuration (page 18)
   void setFIFOAverage(uint8_t samples);
   void enableFIFORollover();

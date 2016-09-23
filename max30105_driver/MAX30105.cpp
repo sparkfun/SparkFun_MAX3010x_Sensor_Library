@@ -44,7 +44,52 @@ boolean MAX30105::begin(uint32_t i2cSpeed, uint8_t i2caddr) {
 // Configuration
 //
 
-void MAX30105::softReset() {
+//Begin Interrupt configuration
+uint8_t MAX30105::getINT1(void) {
+  return(readRegister8(_i2caddr, MAX30105_INTSTAT1));
+}
+uint8_t MAX30105::getINT2(void) {
+  return(readRegister8(_i2caddr, MAX30105_INTSTAT2));
+}
+
+void MAX30105::enableAFULL(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_A_FULL_MASK, MAX30105_INT_A_FULL_ENABLE);
+}
+void MAX30105::disableAFULL(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_A_FULL_MASK, MAX30105_INT_A_FULL_DISABLE);
+}
+
+void MAX30105::enableDATARDY(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_DATA_RDY_MASK, MAX30105_INT_DATA_RDY_ENABLE);
+}
+void MAX30105::disableDATARDY(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_DATA_RDY_MASK, MAX30105_INT_DATA_RDY_DISABLE);
+}
+
+void MAX30105::enableALCOVF(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_ALC_OVF_MASK, MAX30105_INT_ALC_OVF_ENABLE);
+}
+void MAX30105::disableALCOVF(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_ALC_OVF_MASK, MAX30105_INT_ALC_OVF_DISABLE);
+}
+
+void MAX30105::enablePROXINT(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_PROX_INT_MASK, MAX30105_INT_PROX_INT_ENABLE);
+}
+void MAX30105::disablePROXINT(void) {
+  bitMask(MAX30105_INTENABLE1, MAX30105_INT_PROX_INT_MASK, MAX30105_INT_PROX_INT_DISABLE);
+}
+
+void MAX30105::enableDIETEMPRDY(void) {
+  bitMask(MAX30105_INTENABLE2, MAX30105_INT_DIE_TEMP_RDY_MASK, MAX30105_INT_DIE_TEMP_RDY_ENABLE);
+}
+void MAX30105::disableDIETEMPRDY(void) {
+  bitMask(MAX30105_INTENABLE2, MAX30105_INT_DIE_TEMP_RDY_MASK, MAX30105_INT_DIE_TEMP_RDY_DISABLE);
+}
+
+//End Interrupt configuration
+
+void MAX30105::softReset(void) {
   bitMask(MAX30105_MODECONFIG, MAX30105_RESET_MASK, MAX30105_RESET);
 
   // Poll for bit to clear, reset is then complete
@@ -58,14 +103,14 @@ void MAX30105::softReset() {
   }
 }
 
-void MAX30105::shutDown() {
+void MAX30105::shutDown(void) {
   // Put IC into low power mode (datasheet pg. 19)
   // During shutdown the IC will continue to respond to I2C commands but will
   // not update with or take new readings (such as temperature)
   bitMask(MAX30105_MODECONFIG, MAX30105_SHUTDOWN_MASK, MAX30105_SHUTDOWN);
 }
 
-void MAX30105::wakeUp() {
+void MAX30105::wakeUp(void) {
   // Pull IC out of low power mode (datasheet pg. 19)
   bitMask(MAX30105_MODECONFIG, MAX30105_SHUTDOWN_MASK, MAX30105_WAKEUP);
 }
@@ -177,6 +222,7 @@ void MAX30105::disableFIFORollover(void) {
 }
 
 //Set number of samples to trigger the almost full interrupt (Page 18)
+//Power on default is 32 samples
 //Note it is reverse: 0x00 is 32 samples, 0x0F is 17 samples
 void MAX30105::setFIFOAlmostFull(uint8_t numberOfSamples) {
   bitMask(MAX30105_FIFOCONFIG, MAX30105_A_FULL_MASK, numberOfSamples);
@@ -184,12 +230,12 @@ void MAX30105::setFIFOAlmostFull(uint8_t numberOfSamples) {
 
 //Read the FIFO Write Pointer
 uint8_t MAX30105::getWritePointer(void) {
-  return(readRegister8(MAX30105_ADDRESS, MAX30105_FIFOWRITEPTR));
+  return(readRegister8(_i2caddr, MAX30105_FIFOWRITEPTR));
 }
 
 //Read the FIFO Read Pointer
 uint8_t MAX30105::getReadPointer(void) {
-  return(readRegister8(MAX30105_ADDRESS, MAX30105_FIFOREADPTR));
+  return(readRegister8(_i2caddr, MAX30105_FIFOREADPTR));
 }
 
 
@@ -255,6 +301,7 @@ void MAX30105::defaultSetup(){
   //FIFO Configuration
   //setFIFOAverage(MAX30105_SAMPLEAVG_1); //No averaging per FIFO record - Guess
   setFIFOAverage(MAX30105_SAMPLEAVG_4); //Avg four samples per FIFO record - Guess
+  //setFIFOAlmostFull(2); //Set to 30 samples to trigger an 'Almost Full' interrupt
   enableFIFORollover(); //Allow FIFO to wrap/roll over
 
   //Mode Configuration
@@ -263,15 +310,20 @@ void MAX30105::defaultSetup(){
 
   //Particle Sensing Configuration
   setADCRange(MAX30105_ADCRANGE_16384); //Guess
-  setSampleRate(MAX30105_SAMPLERATE_100); //Take 100 samples per second - Guess
+  setSampleRate(MAX30105_SAMPLERATE_100); //Take 100 samples per second
   //setSampleRate(MAX30105_SAMPLERATE_800); //Take 800 samples per second
   //setSampleRate(MAX30105_SAMPLERATE_3200); //Take 3200 samples per second
+
+  //The longer the pulse width the longer range of detection you'll have
+  //At 69us and 0.4mA it's about 2 inches
+  //At 411us and 0.4mA it's about 6 inches
   setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
   //setPulseWidth(MAX30105_PULSEWIDTH_411); //Page 26, Gets us 18 bit resolution
 
   //LED Pulse Amplitude
-  //const uint8_t powerLevel = 0x1F; //Guess. Gets us 6.4mA
-  const uint8_t powerLevel = 0x7F; //25.4mA - Presence detection of ~6 inch
+  //const uint8_t powerLevel = 0x02; //0.4mA - Presence detection of ~6 inch
+  const uint8_t powerLevel = 0x1F; //6.4mA - Presence detection of ~12 inch
+  //const uint8_t powerLevel = 0x7F; //25.4mA - Presence detection of ~12 inch
   //const uint8_t powerLevel = 0xFF; //50.0mA - Presence detection of ~15 inch
   
   setPulseAmplitudeRed(powerLevel); 

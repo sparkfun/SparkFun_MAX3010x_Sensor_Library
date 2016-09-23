@@ -34,7 +34,7 @@ void setup() {
 
   // Initialize sensor
   if (!particleSensor.begin(I2C_SPEED_FAST)) {
-//  if (!particleSensor.begin(I2C_SPEED_STANDARD)) {
+//  if (!particleSensor.begin()) {
     Serial.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);
   }
@@ -47,6 +47,8 @@ void setup() {
   zeroSamples(); //Initialize the data set
 
   startTime = millis();
+
+  particleSensor.enableAFULL(); //Enable A_FULL interrupt
 }
 
 void loop() {
@@ -55,7 +57,6 @@ void loop() {
 
   if (sense.head != sense.tail)
   {
-    //Serial.println("New!");
     printSamples();
   }
 
@@ -209,6 +210,15 @@ void printSamples()
     Serial.print("] Hz[");
     Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
     Serial.print("]");
+
+    byte flags = particleSensor.getINT1(); //Read interrupts
+    if(flags)
+    {
+      Serial.print(" I[");
+      Serial.print(flags, BIN);
+      Serial.print("]");
+    }
+    
     Serial.println();
 
     sense.tail++;
