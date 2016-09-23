@@ -4,7 +4,7 @@
   These sensors use I2C to communicate, as well as a single (optional)
   interrupt line that is not currently supported in this driver.
 
-  Written by Peter Janen and XX
+  Written by Peter Janen and Nathan Seidle (SparkFun)
   BSD license, all text above must be included in any redistribution.
  *****************************************************/
 
@@ -12,7 +12,6 @@
 
 MAX30105::MAX30105() {
   // Constructor
-
 }
 
 boolean MAX30105::begin(uint8_t i2caddr) {
@@ -74,7 +73,6 @@ void MAX30105::setLEDMode(uint8_t mode) {
   // See datasheet, page 19
   bitMask(MAX30105_MODECONFIG, MAX30105_MODE_MASK, mode);
 }
-
 
 void MAX30105::setADCRange(uint8_t adcRange) {
   // adcRange: one of MAX30105_ADCRANGE_2048, _4096, _8192, _16384
@@ -182,6 +180,17 @@ void MAX30105::setFIFOAlmostFull(uint8_t numberOfSamples) {
   bitMask(MAX30105_FIFOCONFIG, MAX30105_A_FULL_MASK, numberOfSamples);
 }
 
+//Read the FIFO Write Pointer
+uint8_t MAX30105::getWritePointer(void) {
+  return(readRegister8(MAX30105_ADDRESS, MAX30105_FIFOWRITEPTR));
+}
+
+//Read the FIFO Read Pointer
+uint8_t MAX30105::getReadPointer(void) {
+  return(readRegister8(MAX30105_ADDRESS, MAX30105_FIFOREADPTR));
+}
+
+
 //
 // Die Temperature
 // Returns temp in C
@@ -235,6 +244,44 @@ uint8_t MAX30105::getRevisionID() {
 }
 
 
+//Default setup of the sensor
+//These settings were chosen based on rough testing
+//Use the default setup if you are just getting started with the MAX30105 sensor
+void MAX30105::defaultSetup(){
+  softReset(); //Reset all configuration, threshold, and data registers to POR values
+
+  //FIFO Configuration
+  setFIFOAverage(MAX30105_SAMPLEAVG_4); //Guess
+  enableFIFORollover(); //Allow FIFO to wrap/roll over
+
+  //Mode Configuration
+  //setLEDMode(MAX30105_MODE_MULTILED); //Let's watch all three LED channels
+  setLEDMode(MAX30105_MODE_REDIRONLY); //Red and IR
+
+  //Particle Sensing Configuration
+  setADCRange(MAX30105_ADCRANGE_16384); //Guess
+  setSampleRate(MAX30105_SAMPLERATE_100); //Guess
+  setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
+
+  //LED Pulse Amplitude
+  const uint8_t powerLevel = 0x1F; //Guess. Gets us 6.4mA
+  //const uint8_t powerLevel = 0x7F; //25.4mA - Presence detection of ~6 inch
+  //const uint8_t powerLevel = 0xFF; //50.0mA - Presence detection of ~15 inch
+  
+  setPulseAmplitudeRed(powerLevel); 
+  setPulseAmplitudeIR(powerLevel);
+  setPulseAmplitudeGreen(powerLevel);
+  setPulseAmplitudeProximity(powerLevel);
+
+  //Multi-LED Mode Configuration, Enable the reading of the three LEDs
+  enableSlot(1, SLOT_RED_LED);
+  enableSlot(2, SLOT_IR_LED);
+  //enableSlot(3, SLOT_GREEN_LED);
+
+  clearFIFO(); //Reset the FIFO before we begin checking the sensor
+}
+
+
 //Given a register, read it, mask it, and then set the thing
 void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
 {
@@ -265,5 +312,3 @@ void MAX30105::writeRegister8(uint8_t address, uint8_t reg, uint8_t value) {
   Wire.write(value);
   Wire.endTransmission();
 }
-
-

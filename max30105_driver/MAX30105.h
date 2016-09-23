@@ -1,5 +1,6 @@
 /*************************************************** 
  This is a library written for the Maxim MAX30105 Optical Smoke Detector
+ It should also work with the MAX30102. However, the MAX30102 does not have a Green LED.
 
  These sensors use I2C to communicate, as well as a single (optional)
  interrupt line that is not currently supported in this driver.
@@ -20,6 +21,7 @@
 // MAX30105 I2C Address (7-bit)
 //
 #define MAX30105_ADDRESS  0x57
+//Note that MAX30102 has the same I2C address and Part ID
 
 //
 // MAX30105 I2C Register Addresses
@@ -58,7 +60,7 @@
 
 // Part ID Registers
 #define MAX30105_REVISIONID       0xFE
-#define MAX30105_PARTID           0xFF    // Should always be 0x15
+#define MAX30105_PARTID           0xFF    // Should always be 0x15. Identical to MAX30102.
 
 
 //
@@ -66,7 +68,7 @@
 //
 
 // FIFO configuration commands (pgs 18)
-#define MAX30105_SAMPLEAVG_MASK     0x1F
+#define MAX30105_SAMPLEAVG_MASK     (byte)~0b11100000
 #define MAX30105_SAMPLEAVG_1        0x00
 #define MAX30105_SAMPLEAVG_2        0x20
 #define MAX30105_SAMPLEAVG_4        0x40
@@ -122,19 +124,19 @@
 #define MAX30105_SLOT3_MASK         0xF8
 #define MAX30105_SLOT4_MASK         0x8F
 
-#define SLOT_NONE          0x00
-#define SLOT_RED_LED       0x01
-#define SLOT_GREEN_LED     0x02
-#define SLOT_IR_LED        0x03
-#define SLOT_NONE_PILOT    0x04
-#define SLOT_RED_PILOT     0x05
-#define SLOT_GREEN_PILOT   0x06
-#define SLOT_IR_PILOT      0x07
+#define SLOT_NONE                   0x00
+#define SLOT_RED_LED                0x01
+#define SLOT_GREEN_LED              0x02
+#define SLOT_IR_LED                 0x03
+#define SLOT_NONE_PILOT             0x04
+#define SLOT_RED_PILOT              0x05
+#define SLOT_GREEN_PILOT            0x06
+#define SLOT_IR_PILOT               0x07
 
 //
 // MAX30105 Other Defines
 //
-#define MAX_30105_EXPECTEDPARTID  0x15
+#define MAX_30105_EXPECTEDPARTID    0x15
 
 //
 // Driver Class Definition
@@ -178,8 +180,9 @@ class MAX30105 {
   void disableFIFORollover();
   void setFIFOAlmostFull(uint8_t samples);
   
-  //uint8_t getReadPointer();
-  //uint8_t getWritePointer();
+  //FIFO Reading
+  uint8_t getWritePointer(void);
+  uint8_t getReadPointer(void);
   void clearFIFO(void);
 
   // Die Temperature
@@ -189,6 +192,9 @@ class MAX30105 {
   // Detecting ID/Revision
   uint8_t getRevisionID();
   uint8_t readPartID();  
+
+  // Default setup
+  void defaultSetup();
 
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);
@@ -204,8 +210,3 @@ class MAX30105 {
   void bitMask(uint8_t reg, uint8_t mask, uint8_t thing);
   
 };
-
-
-
-
-
