@@ -7,14 +7,17 @@
 #include "MAX30105.h"
 MAX30105 particleSensor = MAX30105();
 
+const int STORAGE_SIZE = 70; //Each long is 4 bytes so limit this to fit on your micro
 struct Record
 {
-  long red;
-  long IR;
-  long green;
+  long red[STORAGE_SIZE];
+  long IR[STORAGE_SIZE];
+  long green[STORAGE_SIZE];
+  byte head;
+  byte tail;
 };
 
-struct Record sense[32]; //These are our stored readings
+Record sense; //This is our locally stored readings
 
 //activeLEDs is the number of channels turned on, and can be 1 to 3.
 //2 is common for Red+IR.
@@ -42,16 +45,16 @@ void setup() {
 
 void loop() {
 
-  int newReadings = check(); //Check the sensor for new data
+  check(); //Check the sensor for new data
 
-  if (newReadings > 0)
+  if (sense.head != sense.tail)
   {
-    Serial.println("New!");
+    //Serial.println("New!");
     printSamples();
   }
 
   // Read die temperature
-  float temp = particleSensor.readTemperature();
+  /*float temp = particleSensor.readTemperature();
   Serial.print("Die Temperature: ");
   Serial.print(temp, 2);
   Serial.print(" deg C");
@@ -59,14 +62,15 @@ void loop() {
   temp = particleSensor.readTemperatureF();
   Serial.print(", ");
   Serial.print(temp, 2);
-  Serial.println(" deg F");
+  Serial.println(" deg F");*/
 
   delay(100);
 }
 
 //Polls the sensor for new data
 //Call regularly
-int check()
+//Updates the head and tail in the main struct
+void check()
 {
   //Read register FIDO_DATA in (3-byte * number of active LED) chunks
   //Until FIFO_RD_PTR = FIFO_WR_PTR
@@ -125,7 +129,7 @@ int check()
         //Convert array to long
         memcpy(&tempLong, temp, sizeof(tempLong));
 
-        sense[readPointer].red = tempLong;
+        sense.red[sense.head] = tempLong;
 
         if (activeLEDs > 1)
         {
@@ -138,7 +142,7 @@ int check()
           //Convert array to long
           memcpy(&tempLong, temp, sizeof(tempLong));
 
-          sense[readPointer].IR = tempLong;
+          sense.IR[sense.head] = tempLong;
         }
 
         if (activeLEDs > 2)
@@ -152,13 +156,16 @@ int check()
           //Convert array to long
           memcpy(&tempLong, temp, sizeof(tempLong));
 
-          sense[readPointer].green = tempLong;
+          sense.green[sense.head] = tempLong;
         }
 
         toGet -= activeLEDs * 3;
 
         readPointer++; //Advance our read pointer in the struct
         readPointer %= 32; //Wrap condition
+
+        sense.head++; //Advance the storage struct in the local processor
+        sense.head %= STORAGE_SIZE; //Wrap condition
       }
 
     } //End while (bytesLeftToRead > 0)
@@ -171,28 +178,31 @@ int check()
 //Zero out all the dataums in the sense struct
 void zeroSamples()
 {
-  for (int x = 0 ; x < 32 ; x++)
+  for (int x = 0 ; x < STORAGE_SIZE ; x++)
   {
-    sense[x].red = 0;
-    sense[x].IR = 0;
-    sense[x].green = 0;
+    sense.red[x] = 0;
+    sense.IR[x] = 0;
+    sense.green[x] = 0;
   }
 }
 
 //Prints the struct
 void printSamples()
 {
-  for (int x = 0 ; x < 21 ; x++)
+  while(sense.tail != sense.head)
   {
-    Serial.print(x);
+    //Serial.print(x);
     Serial.print(" R[");
-    Serial.print(sense[x].red);
+    Serial.print(sense.red[sense.tail]);
     Serial.print("] IR[");
-    Serial.print(sense[x].IR);
+    Serial.print(sense.IR[sense.tail]);
     Serial.print("] G[");
-    Serial.print(sense[x].green);
+    Serial.print(sense.green[sense.tail]);
     Serial.print("]");
     Serial.println();
+
+    sense.tail++;
+    sense.tail %= STORAGE_SIZE; //Wrap condition
   }
 }
 

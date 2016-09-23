@@ -251,7 +251,7 @@ void MAX30105::defaultSetup(){
   softReset(); //Reset all configuration, threshold, and data registers to POR values
 
   //FIFO Configuration
-  setFIFOAverage(MAX30105_SAMPLEAVG_4); //Guess
+  setFIFOAverage(MAX30105_SAMPLEAVG_4); //Avg four samples per FIFO record - Guess
   enableFIFORollover(); //Allow FIFO to wrap/roll over
 
   //Mode Configuration
@@ -260,12 +260,13 @@ void MAX30105::defaultSetup(){
 
   //Particle Sensing Configuration
   setADCRange(MAX30105_ADCRANGE_16384); //Guess
-  setSampleRate(MAX30105_SAMPLERATE_100); //Guess
-  setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
+  setSampleRate(MAX30105_SAMPLERATE_100); //Take 100 samples per second - Guess
+  //setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
+  setPulseWidth(MAX30105_PULSEWIDTH_411); //Page 26, Gets us 18 bit resolution
 
   //LED Pulse Amplitude
-  const uint8_t powerLevel = 0x1F; //Guess. Gets us 6.4mA
-  //const uint8_t powerLevel = 0x7F; //25.4mA - Presence detection of ~6 inch
+  //const uint8_t powerLevel = 0x1F; //Guess. Gets us 6.4mA
+  const uint8_t powerLevel = 0x7F; //25.4mA - Presence detection of ~6 inch
   //const uint8_t powerLevel = 0xFF; //50.0mA - Presence detection of ~15 inch
   
   setPulseAmplitudeRed(powerLevel); 
