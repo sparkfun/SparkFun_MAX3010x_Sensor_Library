@@ -20,8 +20,11 @@
 //
 // MAX30105 I2C Address (7-bit)
 //
-#define MAX30105_ADDRESS  0x57
+#define MAX30105_ADDRESS          0x57
 //Note that MAX30102 has the same I2C address and Part ID
+
+#define I2C_SPEED_STANDARD        100000
+#define I2C_SPEED_FAST            400000
 
 //
 // MAX30105 I2C Register Addresses
@@ -146,7 +149,7 @@ class MAX30105 {
  public: 
   MAX30105(void);
 
-  boolean begin(uint8_t i2caddr = MAX30105_ADDRESS);
+  boolean begin(uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
 
   // Configuration
   void softReset();

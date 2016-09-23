@@ -23,6 +23,9 @@ Record sense; //This is our locally stored readings
 //2 is common for Red+IR.
 const byte activeLEDs = 2;
 
+long startTime;
+long samplesTaken = 0;
+
 void setup() {
   pinMode(13, OUTPUT);
 
@@ -30,7 +33,8 @@ void setup() {
   Serial.println("Initializing...");
 
   // Initialize sensor
-  if (!particleSensor.begin()) {
+  if (!particleSensor.begin(I2C_SPEED_FAST)) {
+//  if (!particleSensor.begin(I2C_SPEED_STANDARD)) {
     Serial.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);
   }
@@ -41,6 +45,8 @@ void setup() {
   particleSensor.defaultSetup(); //Configure sensor with default settings
 
   zeroSamples(); //Initialize the data set
+
+  startTime = millis();
 }
 
 void loop() {
@@ -64,7 +70,7 @@ void loop() {
   Serial.print(temp, 2);
   Serial.println(" deg F");*/
 
-  delay(100);
+  //delay(100);
 }
 
 //Polls the sensor for new data
@@ -166,6 +172,8 @@ void check()
 
         sense.head++; //Advance the storage struct in the local processor
         sense.head %= STORAGE_SIZE; //Wrap condition
+
+        samplesTaken++; //Testing
       }
 
     } //End while (bytesLeftToRead > 0)
@@ -198,6 +206,8 @@ void printSamples()
     Serial.print(sense.IR[sense.tail]);
     Serial.print("] G[");
     Serial.print(sense.green[sense.tail]);
+    Serial.print("] Hz[");
+    Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
     Serial.print("]");
     Serial.println();
 

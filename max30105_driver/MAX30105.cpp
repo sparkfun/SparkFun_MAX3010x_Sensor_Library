@@ -14,8 +14,10 @@ MAX30105::MAX30105() {
   // Constructor
 }
 
-boolean MAX30105::begin(uint8_t i2caddr) {
+boolean MAX30105::begin(uint32_t i2cSpeed, uint8_t i2caddr) {
+  
   Wire.begin();
+  Wire.setClock(i2cSpeed);
 
   _i2caddr = i2caddr;
 
@@ -251,6 +253,7 @@ void MAX30105::defaultSetup(){
   softReset(); //Reset all configuration, threshold, and data registers to POR values
 
   //FIFO Configuration
+  //setFIFOAverage(MAX30105_SAMPLEAVG_1); //No averaging per FIFO record - Guess
   setFIFOAverage(MAX30105_SAMPLEAVG_4); //Avg four samples per FIFO record - Guess
   enableFIFORollover(); //Allow FIFO to wrap/roll over
 
@@ -261,8 +264,10 @@ void MAX30105::defaultSetup(){
   //Particle Sensing Configuration
   setADCRange(MAX30105_ADCRANGE_16384); //Guess
   setSampleRate(MAX30105_SAMPLERATE_100); //Take 100 samples per second - Guess
-  //setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
-  setPulseWidth(MAX30105_PULSEWIDTH_411); //Page 26, Gets us 18 bit resolution
+  //setSampleRate(MAX30105_SAMPLERATE_800); //Take 800 samples per second
+  //setSampleRate(MAX30105_SAMPLERATE_3200); //Take 3200 samples per second
+  setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
+  //setPulseWidth(MAX30105_PULSEWIDTH_411); //Page 26, Gets us 18 bit resolution
 
   //LED Pulse Amplitude
   //const uint8_t powerLevel = 0x1F; //Guess. Gets us 6.4mA
