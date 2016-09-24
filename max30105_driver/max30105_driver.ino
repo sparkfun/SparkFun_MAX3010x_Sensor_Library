@@ -5,6 +5,7 @@
 
 #include <Wire.h>
 #include "MAX30105.h"
+
 MAX30105 particleSensor = MAX30105();
 
 const int STORAGE_SIZE = 70; //Each long is 4 bytes so limit this to fit on your micro
@@ -33,7 +34,7 @@ void setup() {
   Serial.println("Initializing...");
 
   // Initialize sensor
-  if (!particleSensor.begin(I2C_SPEED_FAST)) {
+  if (!particleSensor.begin(&Wire, I2C_SPEED_FAST)) {
 //  if (!particleSensor.begin()) {
     Serial.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);
@@ -77,7 +78,8 @@ void loop() {
 //Polls the sensor for new data
 //Call regularly
 //Updates the head and tail in the main struct
-void check()
+//Returns number of new samples obtained
+int check()
 {
   //Read register FIDO_DATA in (3-byte * number of active LED) chunks
   //Until FIFO_RD_PTR = FIFO_WR_PTR

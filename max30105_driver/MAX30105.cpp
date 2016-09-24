@@ -14,10 +14,12 @@ MAX30105::MAX30105() {
   // Constructor
 }
 
-boolean MAX30105::begin(uint32_t i2cSpeed, uint8_t i2caddr) {
+boolean MAX30105::begin(TwoWire *wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
   
-  Wire.begin();
-  Wire.setClock(i2cSpeed);
+  _i2cPort = wirePort; //Grab which port the user wants us to use
+  
+  _i2cPort->begin();
+  _i2cPort->setClock(i2cSpeed);
 
   _i2caddr = i2caddr;
 
@@ -362,16 +364,16 @@ void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
 // Low-level I2C Communication
 //
 uint8_t MAX30105::readRegister8(uint8_t address, uint8_t reg) {
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.endTransmission(false);
-  Wire.requestFrom(address, 1);   // Request 1 byte
-  return ( Wire.read() );
+  _i2cPort->beginTransmission(address);
+  _i2cPort->write(reg);
+  _i2cPort->endTransmission(false);
+  _i2cPort->requestFrom(address, 1);   // Request 1 byte
+  return ( _i2cPort->read() );
 }
 
 void MAX30105::writeRegister8(uint8_t address, uint8_t reg, uint8_t value) {
-  Wire.beginTransmission(address);
-  Wire.write(reg);
-  Wire.write(value);
-  Wire.endTransmission();
+  _i2cPort->beginTransmission(address);
+  _i2cPort->write(reg);
+  _i2cPort->write(value);
+  _i2cPort->endTransmission();
 }

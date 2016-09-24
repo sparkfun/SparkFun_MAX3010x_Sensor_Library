@@ -5,7 +5,7 @@
  These sensors use I2C to communicate, as well as a single (optional)
  interrupt line that is not currently supported in this driver.
  
- Written by Peter Janen and XX 
+ Written by Peter Janen and Nathan Seidle (SparkFun)
  BSD license, all text above must be included in any redistribution.
  *****************************************************/
 
@@ -170,7 +170,7 @@ class MAX30105 {
  public: 
   MAX30105(void);
 
-  boolean begin(uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
+  boolean begin(TwoWire *wirePort, uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
 
   // Configuration
   void softReset();
@@ -241,6 +241,8 @@ class MAX30105 {
   
  private:
   uint8_t _i2caddr;
+  TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
+  
   uint8_t revisionID; 
 
   void readRevisionID();
