@@ -6,7 +6,7 @@
 #include <Wire.h>
 #include "MAX30105.h"
 
-MAX30105 particleSensor = MAX30105();
+MAX30105 particleSensor;
 
 const int STORAGE_SIZE = 70; //Each long is 4 bytes so limit this to fit on your micro
 struct Record

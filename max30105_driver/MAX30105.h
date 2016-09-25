@@ -170,7 +170,7 @@ class MAX30105 {
  public: 
   MAX30105(void);
 
-  boolean begin(TwoWire *wirePort, uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
+  boolean begin(TwoWire *wirePort = &Wire, uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
 
   // Configuration
   void softReset();
@@ -240,13 +240,12 @@ class MAX30105 {
   void writeRegister8(uint8_t address, uint8_t reg, uint8_t value);
   
  private:
-  uint8_t _i2caddr;
   TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
+  uint8_t _i2caddr;
   
   uint8_t revisionID; 
 
   void readRevisionID();
 
   void bitMask(uint8_t reg, uint8_t mask, uint8_t thing);
-  
 };
