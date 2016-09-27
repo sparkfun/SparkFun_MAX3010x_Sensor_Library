@@ -14,9 +14,9 @@ MAX30105::MAX30105() {
   // Constructor
 }
 
-boolean MAX30105::begin(TwoWire *wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
+boolean MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
   
-  _i2cPort = wirePort; //Grab which port the user wants us to use
+  _i2cPort = &wirePort; //Grab which port the user wants us to use
   
   _i2cPort->begin();
   _i2cPort->setClock(i2cSpeed);
@@ -299,39 +299,68 @@ uint8_t MAX30105::getRevisionID() {
 }
 
 
-//Default setup of the sensor
-//These settings were chosen based on rough testing
+//Setup the sensor
+//The MAX30105 has many settings. By default we select:
+// Sample Average = 4
+// Mode = MultiLED
+// ADC Range = 16384 (62.5pA per LSB)
+// Sample rate = 50
 //Use the default setup if you are just getting started with the MAX30105 sensor
-void MAX30105::defaultSetup(){
+void MAX30105::setup(byte powerLevel, int sampleAverage, int ledMode, int sampleRate, int pulseWidth){
   softReset(); //Reset all configuration, threshold, and data registers to POR values
 
   //FIFO Configuration
-  //setFIFOAverage(MAX30105_SAMPLEAVG_1); //No averaging per FIFO record - Guess
-  setFIFOAverage(MAX30105_SAMPLEAVG_4); //Avg four samples per FIFO record - Guess
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  //The chip will average multiple samples of same type together if you wish
+  if(sampleAverage == 1) setFIFOAverage(MAX30105_SAMPLEAVG_1); //No averaging per FIFO record
+  if(sampleAverage == 2) setFIFOAverage(MAX30105_SAMPLEAVG_2);
+  if(sampleAverage == 4) setFIFOAverage(MAX30105_SAMPLEAVG_4);
+  if(sampleAverage == 8) setFIFOAverage(MAX30105_SAMPLEAVG_8);
+  if(sampleAverage == 16) setFIFOAverage(MAX30105_SAMPLEAVG_16);
+  if(sampleAverage == 32) setFIFOAverage(MAX30105_SAMPLEAVG_32);
+  
   //setFIFOAlmostFull(2); //Set to 30 samples to trigger an 'Almost Full' interrupt
   enableFIFORollover(); //Allow FIFO to wrap/roll over
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
   //Mode Configuration
-  //setLEDMode(MAX30105_MODE_MULTILED); //Let's watch all three LED channels
-  setLEDMode(MAX30105_MODE_REDIRONLY); //Red and IR
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  if(ledMode == 3) setLEDMode(MAX30105_MODE_MULTILED); //Watch all three LED channels
+  else if(ledMode == 2) setLEDMode(MAX30105_MODE_REDIRONLY); //Red and IR
+  else setLEDMode(MAX30105_MODE_REDONLY); //Red only
+  activeLEDs = ledMode; //Controls how many bytes to read from FIFO buffer
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
   //Particle Sensing Configuration
-  setADCRange(MAX30105_ADCRANGE_16384); //Guess
-  setSampleRate(MAX30105_SAMPLERATE_100); //Take 100 samples per second
-  //setSampleRate(MAX30105_SAMPLERATE_800); //Take 800 samples per second
-  //setSampleRate(MAX30105_SAMPLERATE_3200); //Take 3200 samples per second
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  setADCRange(MAX30105_ADCRANGE_16384); //62.5pA per LSB
+  
+  if(sampleRate < 100) setSampleRate(MAX30105_SAMPLERATE_50); //Take 50 samples per second
+  else if(sampleRate < 200) setSampleRate(MAX30105_SAMPLERATE_100);
+  else if(sampleRate < 400) setSampleRate(MAX30105_SAMPLERATE_200);
+  else if(sampleRate < 800) setSampleRate(MAX30105_SAMPLERATE_400);
+  else if(sampleRate < 1000) setSampleRate(MAX30105_SAMPLERATE_800);
+  else if(sampleRate < 1600) setSampleRate(MAX30105_SAMPLERATE_100);
+  else if(sampleRate < 3200) setSampleRate(MAX30105_SAMPLERATE_1600);
+  else if(sampleRate == 3200) setSampleRate(MAX30105_SAMPLERATE_3200);
+  else setSampleRate(MAX30105_SAMPLERATE_50);
 
   //The longer the pulse width the longer range of detection you'll have
   //At 69us and 0.4mA it's about 2 inches
   //At 411us and 0.4mA it's about 6 inches
-  setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
-  //setPulseWidth(MAX30105_PULSEWIDTH_411); //Page 26, Gets us 18 bit resolution
+  if(pulseWidth < 118) setPulseWidth(MAX30105_PULSEWIDTH_69); //Page 26, Gets us 15 bit resolution
+  else if(pulseWidth < 215) setPulseWidth(MAX30105_PULSEWIDTH_118); //16 bit resolution
+  else if(pulseWidth < 411) setPulseWidth(MAX30105_PULSEWIDTH_215); //17 bit resolution
+  else if(pulseWidth == 411) setPulseWidth(MAX30105_PULSEWIDTH_411); //18 bit resolution
+  else setPulseWidth(MAX30105_PULSEWIDTH_69);
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
   //LED Pulse Amplitude
-  //const uint8_t powerLevel = 0x02; //0.4mA - Presence detection of ~6 inch
-  const uint8_t powerLevel = 0x1F; //6.4mA - Presence detection of ~12 inch
-  //const uint8_t powerLevel = 0x7F; //25.4mA - Presence detection of ~12 inch
-  //const uint8_t powerLevel = 0xFF; //50.0mA - Presence detection of ~15 inch
+  //Default is 0x1F which gets us 6.4mA
+  //powerLevel = 0x02, 0.4mA - Presence detection of ~4 inch
+  //powerLevel = 0x1F, 6.4mA - Presence detection of ~8 inch
+  //powerLevel = 0x7F, 25.4mA - Presence detection of ~8 inch
+  //powerLevel = 0xFF, 50.0mA - Presence detection of ~12 inch
   
   setPulseAmplitudeRed(powerLevel); 
   setPulseAmplitudeIR(powerLevel);
@@ -341,7 +370,10 @@ void MAX30105::defaultSetup(){
   //Multi-LED Mode Configuration, Enable the reading of the three LEDs
   enableSlot(1, SLOT_RED_LED);
   enableSlot(2, SLOT_IR_LED);
-  //enableSlot(3, SLOT_GREEN_LED);
+  enableSlot(3, SLOT_GREEN_LED);
+  //enableSlot(1, SLOT_RED_PILOT);
+  //enableSlot(2, SLOT_IR_PILOT);
+  //enableSlot(3, SLOT_GREEN_PILOT);
 
   clearFIFO(); //Reset the FIFO before we begin checking the sensor
 }
@@ -360,6 +392,117 @@ void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
   writeRegister8(_i2caddr, reg, originalContents | thing);
 }
 
+
+//Polls the sensor for new data
+//Call regularly
+//If new data is available, it updates the head and tail in the main struct
+//Returns number of new samples obtained
+uint16_t MAX30105::check(void)
+{
+  //Read register FIDO_DATA in (3-byte * number of active LED) chunks
+  //Until FIFO_RD_PTR = FIFO_WR_PTR
+
+  byte readPointer = getReadPointer();
+  byte writePointer = getWritePointer();
+
+  int numberOfSamples = 0;
+
+  //Do we have new data?
+  if (readPointer != writePointer)
+  {
+    //Calculate the number of readings we need to get from sensor
+    numberOfSamples = writePointer - readPointer;
+    if (numberOfSamples < 0) numberOfSamples += 32; //Wrap condition
+
+    //We now have the number of readings, now calc bytes to read
+    //For this example we are just doing Red and IR (3 bytes each)
+    int bytesLeftToRead = numberOfSamples * activeLEDs * 3;
+
+    //Get ready to read a burst of data from the FIFO register
+    _i2cPort->beginTransmission(MAX30105_ADDRESS);
+    _i2cPort->write(MAX30105_FIFODATA);
+    _i2cPort->endTransmission();
+
+    //Wire.requestFrom() is limited to BUFFER_LENGTH which is 32 on the Uno
+    //We may need to read as many as 288 bytes so we read in blocks no larger than 32
+    //BUFFER_LENGTH should work with other platforms with larger requestFrom buffers
+    while (bytesLeftToRead > 0)
+    {
+      int toGet = bytesLeftToRead;
+      if (toGet > BUFFER_LENGTH)
+      {
+        //If toGet is 32 this is bad because we read 6 bytes (Red+IR * 3 = 6) at a time
+        //32 % 6 = 2 left over. We don't want to request 32 bytes, we want to request 30.
+        //32 % 9 (Red+IR+GREEN) = 5 left over. We want to request 27.
+
+        toGet = BUFFER_LENGTH - (BUFFER_LENGTH % (activeLEDs * 3)); //Trim toGet to be a multiple of the samples we need to read
+      }
+
+      bytesLeftToRead -= toGet;
+
+      //Request toGet number of bytes from sensor
+      _i2cPort->requestFrom(MAX30105_ADDRESS, toGet);
+
+      while (toGet > 0)
+      {
+        byte temp[sizeof(long)]; //Array of 4 bytes that we will convert into long
+        long tempLong;
+
+        //Burst read three bytes - RED
+        temp[3] = 0;
+        temp[2] = _i2cPort->read();
+        temp[1] = _i2cPort->read();
+        temp[0] = _i2cPort->read();
+
+        //Convert array to long
+        memcpy(&tempLong, temp, sizeof(tempLong));
+
+        sense.red[sense.head] = tempLong; //Store this reading into the sense array
+
+        if (activeLEDs > 1)
+        {
+          //Burst read three more bytes - IR
+          temp[3] = 0;
+          temp[2] = _i2cPort->read();
+          temp[1] = _i2cPort->read();
+          temp[0] = _i2cPort->read();
+
+          //Convert array to long
+          memcpy(&tempLong, temp, sizeof(tempLong));
+
+          sense.IR[sense.head] = tempLong;
+        }
+
+        if (activeLEDs > 2)
+        {
+          //Burst read three more bytes - Green
+          temp[3] = 0;
+          temp[2] = _i2cPort->read();
+          temp[1] = _i2cPort->read();
+          temp[0] = _i2cPort->read();
+
+          //Convert array to long
+          memcpy(&tempLong, temp, sizeof(tempLong));
+
+          sense.green[sense.head] = tempLong;
+        }
+
+        toGet -= activeLEDs * 3;
+
+        sense.head++; //Advance the storage struct in the local processor
+        sense.head %= STORAGE_SIZE; //Wrap condition
+
+        samplesTaken++; //Counter for calculating the Hz or read rate
+      }
+
+    } //End while (bytesLeftToRead > 0)
+
+  } //End readPtr != writePtr
+
+  return (numberOfSamples); //Let the world know how much new data we found
+}
+
+
 //
 // Low-level I2C Communication
 //
@@ -368,7 +511,16 @@ uint8_t MAX30105::readRegister8(uint8_t address, uint8_t reg) {
   _i2cPort->write(reg);
   _i2cPort->endTransmission(false);
   _i2cPort->requestFrom(address, 1);   // Request 1 byte
-  return ( _i2cPort->read() );
+
+  int tries = 0;
+  while(!_i2cPort->available())
+  {
+    delay(1);
+    if(tries++ > 200) break;
+  }
+  if(tries == 200) return(0); //Fail
+
+  return (_i2cPort->read());
 }
 
 void MAX30105::writeRegister8(uint8_t address, uint8_t reg, uint8_t value) {

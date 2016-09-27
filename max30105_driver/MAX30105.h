@@ -138,7 +138,7 @@
 
 #define MAX30105_PULSEWIDTH_MASK    0xFC
 #define MAX30105_PULSEWIDTH_69      0x00
-#define MAX30105_PULSEWIDTH_188     0x01
+#define MAX30105_PULSEWIDTH_118     0x01
 #define MAX30105_PULSEWIDTH_215     0x02
 #define MAX30105_PULSEWIDTH_411     0x03
 
@@ -150,12 +150,12 @@
 
 #define SLOT_NONE                   0x00
 #define SLOT_RED_LED                0x01
-#define SLOT_GREEN_LED              0x02
-#define SLOT_IR_LED                 0x03
+#define SLOT_IR_LED                 0x02
+#define SLOT_GREEN_LED              0x03
 #define SLOT_NONE_PILOT             0x04
 #define SLOT_RED_PILOT              0x05
-#define SLOT_GREEN_PILOT            0x06
-#define SLOT_IR_PILOT               0x07
+#define SLOT_IR_PILOT               0x06
+#define SLOT_GREEN_PILOT            0x07
 
 //
 // MAX30105 Other Defines
@@ -170,7 +170,7 @@ class MAX30105 {
  public: 
   MAX30105(void);
 
-  boolean begin(TwoWire *wirePort = &Wire, uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
+  boolean begin(TwoWire &wirePort = Wire, uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
 
   // Configuration
   void softReset();
@@ -196,7 +196,7 @@ class MAX30105 {
   
   // Data Collection
 
-  //Interrupta (page 13, 14)
+  //Interrupts (page 13, 14)
   uint8_t getINT1(void); //Returns the main interrupt group
   uint8_t getINT2(void); //Returns the temp ready interrupt
   void enableAFULL(void); //Enable/disable individual interrupts
@@ -217,6 +217,7 @@ class MAX30105 {
   void setFIFOAlmostFull(uint8_t samples);
   
   //FIFO Reading
+  uint16_t check(void);
   uint8_t getWritePointer(void);
   uint8_t getReadPointer(void);
   void clearFIFO(void); //Sets the read/write pointers to zero
@@ -232,16 +233,20 @@ class MAX30105 {
   uint8_t getRevisionID();
   uint8_t readPartID();  
 
-  // Default setup
-  void defaultSetup();
+  // Setup the IC with user selectable settings
+  void setup(byte powerLevel = 0x1F, int sampleAverage = 4, int ledMode = 3, int sampleRate = 50, int pulseWidth = 411);
 
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);
   void writeRegister8(uint8_t address, uint8_t reg, uint8_t value);
-  
+
+
  private:
   TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
   uint8_t _i2caddr;
+
+  //activeLEDs is the number of channels turned on, and can be 1 to 3. 2 is common for Red+IR.
+  byte activeLEDs; //Gets set during setup. Allows check() to calculate how many bytes to read from FIFO
   
   uint8_t revisionID; 
 
