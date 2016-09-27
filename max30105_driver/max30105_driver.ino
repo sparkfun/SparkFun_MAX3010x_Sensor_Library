@@ -5,21 +5,15 @@
 
 MAX30105 particleSensor;
 
-const int STORAGE_SIZE = 70; //Each long is 4 bytes so limit this to fit on your micro
-struct Record
+struct colorRecord
 {
-  long red[STORAGE_SIZE];
-  long IR[STORAGE_SIZE];
-  long green[STORAGE_SIZE];
-  byte head;
-  byte tail;
+  long red;
+  long IR;
+  long green;
 };
 
-Record sense; //This is our locally stored readings
-
-
 long startTime;
-long samplesTaken = 0;
+long samplesTaken = 0; //Counter for calculating the Hz or read rate
 
 void setup() {
   pinMode(13, OUTPUT);
@@ -39,8 +33,6 @@ void setup() {
 
   particleSensor.setup(0x7F); //Configure sensor. Use 25mA for LED drive
 
-  zeroSamples(); //Initialize the data set
-
   startTime = millis();
 
   particleSensor.enableAFULL(); //Enable A_FULL interrupt
@@ -48,73 +40,84 @@ void setup() {
 
 void loop() {
 
-  samplesTaken += check(); //Check the sensor for new data
+  samplesTaken += particleSensor.check(); //Check the sensor for new data
 
-  if (sense.head != sense.tail)
+  if (particleSensor.available())
   {
-    printSamples();
+    printSamplesFast();
   }
 
   // Read die temperature
   /*float temp = particleSensor.readTemperature();
-  Serial.print("Die Temperature: ");
-  Serial.print(temp, 2);
-  Serial.print(" deg C");
+    Serial.print("Die Temperature: ");
+    Serial.print(temp, 2);
+    Serial.print(" deg C");
 
-  temp = particleSensor.readTemperatureF();
-  Serial.print(", ");
-  Serial.print(temp, 2);
-  Serial.println(" deg F");*/
+    temp = particleSensor.readTemperatureF();
+    Serial.print(", ");
+    Serial.print(temp, 2);
+    Serial.println(" deg F");*/
 
   //delay(100);
 }
 
-
-//Zero out all the dataums in the sense struct
-void zeroSamples()
+//Reads in the varies color values and prints them
+void printSamplesSlow()
 {
-  for (int x = 0 ; x < STORAGE_SIZE ; x++)
-  {
-    sense.red[x] = 0;
-    sense.IR[x] = 0;
-    sense.green[x] = 0;
-  }
-}
+  while (particleSensor.available() < 3) particleSensor.check(); //Wait for 3 samples to be available
+  
+  Serial.print(" R[");
+  Serial.print(particleSensor.getRed());
+  Serial.print("] IR[");
+  Serial.print(particleSensor.getIR());
+  Serial.print("] G[");
+  Serial.print(particleSensor.getGreen());
+  Serial.print("] Hz[");
+  Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
+  Serial.print("]");
 
-//Prints the struct
-void printSamples()
-{
-  while(sense.tail != sense.head)
+  byte flags = particleSensor.getINT1(); //Read interrupts
+  if (flags)
   {
-    //Serial.print(x);
-    Serial.print(" R[");
-    Serial.print(sense.red[sense.tail]);
-    Serial.print("] IR[");
-    Serial.print(sense.IR[sense.tail]);
-    Serial.print("] G[");
-    Serial.print(sense.green[sense.tail]);
-    Serial.print("] Hz[");
-    Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
+    Serial.print(" I[");
+    Serial.print(flags, BIN);
     Serial.print("]");
-
-    byte flags = particleSensor.getINT1(); //Read interrupts
-    if(flags)
-    {
-      Serial.print(" I[");
-      Serial.print(flags, BIN);
-      Serial.print("]");
-    }
-    
-    Serial.println();
-
-    sense.tail++;
-    sense.tail %= STORAGE_SIZE; //Wrap condition
   }
+
+  Serial.println();
 }
 
-//Scans the current sense array 
+//Reads in the varies color values and prints them
+void printSamplesFast()
+{
+  colorRecord temp = particleSensor.getReading();
+  
+  Serial.print(" R[");
+  Serial.print(temp.red);
+  Serial.print("] IR[");
+  Serial.print(temp.IR);
+  Serial.print("] G[");
+  Serial.print(temp.green);
+  Serial.print("] Hz[");
+  Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
+  Serial.print("]");
+
+  byte flags = particleSensor.getINT1(); //Read interrupts
+  if (flags)
+  {
+    Serial.print(" I[");
+    Serial.print(flags, BIN);
+    Serial.print("]");
+  }
+
+  Serial.println();
+}
+
+
+
+//Scans the current sense array
 void checkForBeat()
 {
-  
+
 }
 

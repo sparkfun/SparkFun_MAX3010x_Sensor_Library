@@ -162,6 +162,7 @@
 //
 #define MAX_30105_EXPECTEDPARTID    0x15
 
+
 //
 // Driver Class Definition
 //
@@ -221,6 +222,11 @@ class MAX30105 {
   uint8_t getWritePointer(void);
   uint8_t getReadPointer(void);
   void clearFIFO(void); //Sets the read/write pointers to zero
+  uint16_t available(void); //Tells caller how many new samples are available
+  uint32_t getRed(void); //Returns the oldest red value. Advances tail of sense array
+  uint32_t getIR(void); //Returns the oldest IR value. Advances tail of sense array
+  uint32_t getGreen(void); //Returns the oldest green value. Advances tail of sense array
+  struct colorRecord getReading(void); //Takes all three values and passes out a colorRecord to caller
 
   //Proximity Mode Interrupt Threshold
   void setPROXINTTHRESH(uint8_t val);
