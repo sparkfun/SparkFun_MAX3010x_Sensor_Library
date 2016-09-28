@@ -378,7 +378,8 @@ void MAX30105::setup(byte powerLevel, int sampleAverage, int ledMode, int sample
   else setPulseWidth(MAX30105_PULSEWIDTH_69);
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-  //LED Pulse Amplitude
+  //LED Pulse Amplitude Configuration
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   //Default is 0x1F which gets us 6.4mA
   //powerLevel = 0x02, 0.4mA - Presence detection of ~4 inch
   //powerLevel = 0x1F, 6.4mA - Presence detection of ~8 inch
@@ -389,14 +390,17 @@ void MAX30105::setup(byte powerLevel, int sampleAverage, int ledMode, int sample
   setPulseAmplitudeIR(powerLevel);
   setPulseAmplitudeGreen(powerLevel);
   setPulseAmplitudeProximity(powerLevel);
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
   //Multi-LED Mode Configuration, Enable the reading of the three LEDs
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   enableSlot(1, SLOT_RED_LED);
-  enableSlot(2, SLOT_IR_LED);
-  enableSlot(3, SLOT_GREEN_LED);
+  if (ledMode > 1) enableSlot(2, SLOT_IR_LED);
+  if (ledMode > 2) enableSlot(3, SLOT_GREEN_LED);
   //enableSlot(1, SLOT_RED_PILOT);
   //enableSlot(2, SLOT_IR_PILOT);
   //enableSlot(3, SLOT_GREEN_PILOT);
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
   clearFIFO(); //Reset the FIFO before we begin checking the sensor
 }
@@ -423,7 +427,7 @@ void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
 uint16_t MAX30105::available(void)
 {
   int16_t numberOfSamples = sense.head - sense.tail;
-  if(numberOfSamples < 0) numberOfSamples += STORAGE_SIZE;
+  if (numberOfSamples < 0) numberOfSamples += STORAGE_SIZE;
 
   return (numberOfSamples);
 }
