@@ -223,10 +223,10 @@ class MAX30105 {
   uint8_t getReadPointer(void);
   void clearFIFO(void); //Sets the read/write pointers to zero
   uint16_t available(void); //Tells caller how many new samples are available
-  uint32_t getRed(void); //Returns the oldest red value. Advances tail of sense array
-  uint32_t getIR(void); //Returns the oldest IR value. Advances tail of sense array
-  uint32_t getGreen(void); //Returns the oldest green value. Advances tail of sense array
-  struct colorRecord getReading(void); //Takes all three values and passes out a colorRecord to caller
+  uint32_t getRed(void); //Returns the oldest red value. 
+  uint32_t getIR(void); //Returns the oldest IR value. 
+  uint32_t getGreen(void); //Returns the oldest green value.
+  void nextSample(void); //Advances the tail of the sense array
 
   //Proximity Mode Interrupt Threshold
   void setPROXINTTHRESH(uint8_t val);
@@ -240,7 +240,7 @@ class MAX30105 {
   uint8_t readPartID();  
 
   // Setup the IC with user selectable settings
-  void setup(byte powerLevel = 0x1F, int sampleAverage = 4, int ledMode = 3, int sampleRate = 50, int pulseWidth = 411);
+  void setup(byte powerLevel = 0x1F, byte sampleAverage = 4, byte ledMode = 3, int sampleRate = 100, int pulseWidth = 411);
 
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);

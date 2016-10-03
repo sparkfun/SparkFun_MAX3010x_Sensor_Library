@@ -1,5 +1,6 @@
 /***************************************************
   This is a library written for the Maxim MAX30105 Optical Smoke Detector
+  It should also work with the MAX30102. However, the MAX30102 does not have a Green LED.
 
   These sensors use I2C to communicate, as well as a single (optional)
   interrupt line that is not currently supported in this driver.
@@ -54,11 +55,6 @@ boolean MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
 
   // Populate revision ID
   readRevisionID();
-
-  //Enable the reading of the three LEDs
-  //enableSlot(1, SLOT_RED_LED);
-  //enableSlot(2, SLOT_GREEN_LED);
-  //enableSlot(3, SLOT_IR_LED);
 
   return true;
 }
@@ -329,7 +325,7 @@ uint8_t MAX30105::getRevisionID() {
 // ADC Range = 16384 (62.5pA per LSB)
 // Sample rate = 50
 //Use the default setup if you are just getting started with the MAX30105 sensor
-void MAX30105::setup(byte powerLevel, int sampleAverage, int ledMode, int sampleRate, int pulseWidth) {
+void MAX30105::setup(byte powerLevel, byte sampleAverage, byte ledMode, int sampleRate, int pulseWidth) {
   softReset(); //Reset all configuration, threshold, and data registers to POR values
 
   //FIFO Configuration
@@ -357,6 +353,7 @@ void MAX30105::setup(byte powerLevel, int sampleAverage, int ledMode, int sample
   //Particle Sensing Configuration
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   setADCRange(MAX30105_ADCRANGE_16384); //62.5pA per LSB
+  //setADCRange(MAX30105_ADCRANGE_2048); //62.5pA per LSB
 
   if (sampleRate < 100) setSampleRate(MAX30105_SAMPLERATE_50); //Take 50 samples per second
   else if (sampleRate < 200) setSampleRate(MAX30105_SAMPLERATE_100);
@@ -433,59 +430,28 @@ uint16_t MAX30105::available(void)
 }
 
 //Report oldest red value
-//Automatically advances the tail
 uint32_t MAX30105::getRed(void)
 {
-  long temp = sense.red[sense.tail];
-  sense.tail++;
-  sense.tail %= STORAGE_SIZE; //Wrap condition
-  return (temp);
+  return (sense.red[sense.tail]);
 }
 
 //Report oldest IR value
-//Automatically advances the tail
 uint32_t MAX30105::getIR(void)
 {
-  long temp = sense.IR[sense.tail];
-  sense.tail++;
-  sense.tail %= STORAGE_SIZE; //Wrap condition
-  return (temp);
+  return (sense.IR[sense.tail]);
 }
 
 //Report oldest Green value
-//Automatically advances the tail
 uint32_t MAX30105::getGreen(void)
 {
-  long temp = sense.green[sense.tail];
-  sense.tail++;
-  sense.tail %= STORAGE_SIZE; //Wrap condition
-  return (temp);
+  return (sense.green[sense.tail]);
 }
 
-//Report oldest Green value
-//Automatically advances the tail
-struct colorRecord MAX30105::getReading(void)
+//Advance the tail
+void MAX30105::nextSample(void)
 {
-  colorRecord currentColor;
-
-  if (available())
-  {
-    currentColor.red = sense.red[sense.tail];
-    currentColor.IR = sense.IR[sense.tail];
-    currentColor.green = sense.green[sense.tail];
-
-    sense.tail++; //Advance the tail
-    sense.tail %= STORAGE_SIZE; //Wrap condition
-
-  }
-  else
-  {
-    currentColor.red = 0;
-    currentColor.IR = 0;
-    currentColor.green = 0;
-  }
-
-  return (currentColor);
+  sense.tail++;
+  sense.tail %= STORAGE_SIZE; //Wrap condition
 }
 
 //Polls the sensor for new data
@@ -537,7 +503,7 @@ uint16_t MAX30105::check(void)
 
       //Request toGet number of bytes from sensor
       _i2cPort->requestFrom(MAX30105_ADDRESS, toGet);
-
+      
       while (toGet > 0)
       {
         byte temp[sizeof(long)]; //Array of 4 bytes that we will convert into long
