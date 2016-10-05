@@ -17,7 +17,8 @@
 
 MAX30105 particleSensor;
 
-byte rates[8]; //Array of heart rates
+const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good. 
+byte rates[RATE_SIZE]; //Array of heart rates
 byte rateSpot = 0;
 long lastBeat = 0; //Time at which the last beat occurred
 
@@ -35,6 +36,8 @@ void setup()
   Serial.println("Place your index finger on the sensor with steady pressure.");
 
   particleSensor.setup(0x7F); //Configure sensor. Use 25mA for LED drive
+  particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low
+  particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
 }
 
 void loop()
@@ -58,13 +61,13 @@ void loop()
         Serial.print(beatsPerMinute);
 
         rates[rateSpot++] = (byte)beatsPerMinute; //Store this reading in the array
-        rateSpot %= 8; //Wrap variable
+        rateSpot %= RATE_SIZE; //Wrap variable
 
         //Take average of readings
         int beatAvg = 0;
-        for(byte x = 0 ; x < 8 ; x++)
+        for(byte x = 0 ; x < RATE_SIZE ; x++)
           beatAvg += rates[x];
-        beatAvg /= 8;
+        beatAvg /= RATE_SIZE;
         
         Serial.print(" Avg BPM: ");
         Serial.println(beatAvg);
@@ -74,6 +77,9 @@ void loop()
         Serial.println("Getting reading");
       }
     }
+
+    particleSensor.nextSample(); //We're finished with this sample so move to next sample
+    
   }
 }
 
