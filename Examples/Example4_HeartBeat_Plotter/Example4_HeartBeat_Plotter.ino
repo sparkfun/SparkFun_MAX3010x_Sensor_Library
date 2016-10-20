@@ -12,7 +12,7 @@
   3) Open Tools->'Serial Plotter'
   4) Make sure the drop down is set to 115200 baud
   5) Checkout the blips!
-  6) Feel the pulse on your neck and watch it mimick the blips
+  6) Feel the pulse on your neck and watch it mimic the blips
 
   It is best to attach the sensor to your finger using a rubber band or other tightening 
   device. Humans are generally bad at applying constant pressure to a thing. When you 

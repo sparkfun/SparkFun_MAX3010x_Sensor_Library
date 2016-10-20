@@ -53,8 +53,6 @@ void setup()
   particleSensor.setPulseAmplitudeRed(0); //Turn off Red LED
   particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
 
-  startTime = millis();
-
   //Take an average of IR readings at power up
   unblockedValue = 0;
   for (byte x = 0 ; x < 32 ; x++)
@@ -70,6 +68,7 @@ void setup()
   }
   unblockedValue /= 32;
 
+  startTime = millis();
 }
 
 void loop()

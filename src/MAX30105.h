@@ -246,7 +246,6 @@ class MAX30105 {
   uint8_t readRegister8(uint8_t address, uint8_t reg);
   void writeRegister8(uint8_t address, uint8_t reg, uint8_t value);
 
-
  private:
   TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
   uint8_t _i2caddr;
