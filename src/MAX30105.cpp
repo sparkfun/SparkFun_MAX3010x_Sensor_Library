@@ -5,7 +5,7 @@
   These sensors use I2C to communicate, as well as a single (optional)
   interrupt line that is not currently supported in this driver.
 
-  Written by Peter Janen and Nathan Seidle (SparkFun)
+  Written by Peter Jansen and Nathan Seidle (SparkFun)
   BSD license, all text above must be included in any redistribution.
  *****************************************************/
 
