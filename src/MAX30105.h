@@ -222,7 +222,7 @@ class MAX30105 {
   uint8_t getWritePointer(void);
   uint8_t getReadPointer(void);
   void clearFIFO(void); //Sets the read/write pointers to zero
-  uint16_t available(void); //Tells caller how many new samples are available
+  uint8_t available(void); //Tells caller how many new samples are available
   uint32_t getRed(void); //Returns the oldest red value. 
   uint32_t getIR(void); //Returns the oldest IR value. 
   uint32_t getGreen(void); //Returns the oldest green value.
@@ -240,7 +240,7 @@ class MAX30105 {
   uint8_t readPartID();  
 
   // Setup the IC with user selectable settings
-  void setup(byte powerLevel = 0x1F, byte sampleAverage = 4, byte ledMode = 3, int sampleRate = 100, int pulseWidth = 411);
+  void setup(byte powerLevel = 0x1F, byte sampleAverage = 4, byte ledMode = 3, int sampleRate = 100, int pulseWidth = 411, int adcRange = 4096);
 
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);

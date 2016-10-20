@@ -11,7 +11,9 @@
 
 #include "MAX30105.h"
 
-const int STORAGE_SIZE = 70; //Each long is 4 bytes so limit this to fit on your micro
+//The MAX30105 stores up to 32 samples on the IC
+//This is additional local storage to the microcontroller
+const int STORAGE_SIZE = 2; //Each long is 4 bytes so limit this to fit on your micro
 struct Record
 {
   long red[STORAGE_SIZE];
@@ -19,18 +21,7 @@ struct Record
   long green[STORAGE_SIZE];
   byte head;
   byte tail;
-};
-
-Record sense; //This is our circular buffer of readings from the sensor
-
-struct colorRecord
-{
-  long red;
-  long IR;
-  long green;
-};
-
-colorRecord currentColor; //currentColor is a single color reading so we can pass it back to the user's arduino sketch
+} sense; //This is our circular buffer of readings from the sensor
 
 MAX30105::MAX30105() {
   // Constructor
@@ -58,8 +49,6 @@ boolean MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
 
   return true;
 }
-
-
 
 //
 // Configuration
@@ -325,18 +314,19 @@ uint8_t MAX30105::getRevisionID() {
 // ADC Range = 16384 (62.5pA per LSB)
 // Sample rate = 50
 //Use the default setup if you are just getting started with the MAX30105 sensor
-void MAX30105::setup(byte powerLevel, byte sampleAverage, byte ledMode, int sampleRate, int pulseWidth) {
+void MAX30105::setup(byte powerLevel, byte sampleAverage, byte ledMode, int sampleRate, int pulseWidth, int adcRange) {
   softReset(); //Reset all configuration, threshold, and data registers to POR values
 
   //FIFO Configuration
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   //The chip will average multiple samples of same type together if you wish
   if (sampleAverage == 1) setFIFOAverage(MAX30105_SAMPLEAVG_1); //No averaging per FIFO record
-  if (sampleAverage == 2) setFIFOAverage(MAX30105_SAMPLEAVG_2);
-  if (sampleAverage == 4) setFIFOAverage(MAX30105_SAMPLEAVG_4);
-  if (sampleAverage == 8) setFIFOAverage(MAX30105_SAMPLEAVG_8);
-  if (sampleAverage == 16) setFIFOAverage(MAX30105_SAMPLEAVG_16);
-  if (sampleAverage == 32) setFIFOAverage(MAX30105_SAMPLEAVG_32);
+  else if (sampleAverage == 2) setFIFOAverage(MAX30105_SAMPLEAVG_2);
+  else if (sampleAverage == 4) setFIFOAverage(MAX30105_SAMPLEAVG_4);
+  else if (sampleAverage == 8) setFIFOAverage(MAX30105_SAMPLEAVG_8);
+  else if (sampleAverage == 16) setFIFOAverage(MAX30105_SAMPLEAVG_16);
+  else if (sampleAverage == 32) setFIFOAverage(MAX30105_SAMPLEAVG_32);
+  else setFIFOAverage(MAX30105_SAMPLEAVG_4);
 
   //setFIFOAlmostFull(2); //Set to 30 samples to trigger an 'Almost Full' interrupt
   enableFIFORollover(); //Allow FIFO to wrap/roll over
@@ -347,20 +337,23 @@ void MAX30105::setup(byte powerLevel, byte sampleAverage, byte ledMode, int samp
   if (ledMode == 3) setLEDMode(MAX30105_MODE_MULTILED); //Watch all three LED channels
   else if (ledMode == 2) setLEDMode(MAX30105_MODE_REDIRONLY); //Red and IR
   else setLEDMode(MAX30105_MODE_REDONLY); //Red only
-  activeLEDs = ledMode; //Controls how many bytes to read from FIFO buffer
+  activeLEDs = ledMode; //Used to control how many bytes to read from FIFO buffer
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
   //Particle Sensing Configuration
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  setADCRange(MAX30105_ADCRANGE_16384); //62.5pA per LSB
-  //setADCRange(MAX30105_ADCRANGE_2048); //62.5pA per LSB
+  if(adcRange < 4096) setADCRange(MAX30105_ADCRANGE_2048); //7.81pA per LSB
+  else if(adcRange < 8192) setADCRange(MAX30105_ADCRANGE_4096); //15.63pA per LSB
+  else if(adcRange < 16384) setADCRange(MAX30105_ADCRANGE_8192); //31.25pA per LSB
+  else if(adcRange == 16384) setADCRange(MAX30105_ADCRANGE_16384); //62.5pA per LSB
+  else setADCRange(MAX30105_ADCRANGE_2048);
 
   if (sampleRate < 100) setSampleRate(MAX30105_SAMPLERATE_50); //Take 50 samples per second
   else if (sampleRate < 200) setSampleRate(MAX30105_SAMPLERATE_100);
   else if (sampleRate < 400) setSampleRate(MAX30105_SAMPLERATE_200);
   else if (sampleRate < 800) setSampleRate(MAX30105_SAMPLERATE_400);
   else if (sampleRate < 1000) setSampleRate(MAX30105_SAMPLERATE_800);
-  else if (sampleRate < 1600) setSampleRate(MAX30105_SAMPLERATE_100);
+  else if (sampleRate < 1600) setSampleRate(MAX30105_SAMPLERATE_1000);
   else if (sampleRate < 3200) setSampleRate(MAX30105_SAMPLERATE_1600);
   else if (sampleRate == 3200) setSampleRate(MAX30105_SAMPLERATE_3200);
   else setSampleRate(MAX30105_SAMPLERATE_50);
@@ -402,28 +395,14 @@ void MAX30105::setup(byte powerLevel, byte sampleAverage, byte ledMode, int samp
   clearFIFO(); //Reset the FIFO before we begin checking the sensor
 }
 
-
-//Given a register, read it, mask it, and then set the thing
-void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
-{
-  // Grab current register context
-  uint8_t originalContents = readRegister8(_i2caddr, reg);
-
-  // Zero-out the portions of the register we're interested in
-  originalContents = originalContents & mask;
-
-  // Change contents
-  writeRegister8(_i2caddr, reg, originalContents | thing);
-}
-
 //
 // Data Collection
 //
 
 //Tell caller how many samples are available
-uint16_t MAX30105::available(void)
+uint8_t MAX30105::available(void)
 {
-  int16_t numberOfSamples = sense.head - sense.tail;
+  uint8_t numberOfSamples = sense.head - sense.tail;
   if (numberOfSamples < 0) numberOfSamples += STORAGE_SIZE;
 
   return (numberOfSamples);
@@ -450,8 +429,11 @@ uint32_t MAX30105::getGreen(void)
 //Advance the tail
 void MAX30105::nextSample(void)
 {
-  sense.tail++;
-  sense.tail %= STORAGE_SIZE; //Wrap condition
+  if(available()) //Only advance the tail if new data is available
+  {
+    sense.tail++;
+    sense.tail %= STORAGE_SIZE; //Wrap condition
+  }
 }
 
 //Polls the sensor for new data
@@ -561,6 +543,19 @@ uint16_t MAX30105::check(void)
   return (numberOfSamples); //Let the world know how much new data we found
 }
 
+
+//Given a register, read it, mask it, and then set the thing
+void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
+{
+  // Grab current register context
+  uint8_t originalContents = readRegister8(_i2caddr, reg);
+
+  // Zero-out the portions of the register we're interested in
+  originalContents = originalContents & mask;
+
+  // Change contents
+  writeRegister8(_i2caddr, reg, originalContents | thing);
+}
 
 //
 // Low-level I2C Communication

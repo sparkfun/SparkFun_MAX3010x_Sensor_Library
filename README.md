@@ -1,21 +1,38 @@
-MAX30105 Air Particle Sensor Driver and Breakout Board
-======
+SparkFun MAX301x Particle Sensor Library
+===========================================================
 
-Work-in-progress. <br>
-This is a driver and breakout board to explore the new MAX30105 Air Particle Sensor. <br>
+![SparkFun Humidity and Temperature Sensor Breakout - HTU21D](https://dlnmh9ip6v2uc.cloudfront.net/images/products/1/2/0/6/4/12064-04.jpg)  
 
+[*SparkFun Humidity and Temperature Sensor Breakout - HTU21D (SEN-12064)*](https://www.sparkfun.com/products/12064)
 
-# Open Source
+This is a breadboard friendly breakout board for the Maxim MAX30105 reflectance, particle, and pulse ox sensor.
 
-This project is open source software and hardware, and is released under various open licenses.
+Written by Peter Janen ([Open Sensing Lab](https://github.com/opensensinglab)) and Nathan Seidle ([SparkFun](http://www.sparkfun.com)).
 
-# Disclaimer
+Repository Contents
+-------------------
 
-**DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY.**
+* **/examples** - Example sketches for the library (.ino). Run these from the Arduino IDE. 
+* **/src** - Source files for the library (.cpp, .h).
+* **keywords.txt** - Keywords from this library that will be highlighted in the Arduino IDE. 
+* **library.properties** - General library properties for the Arduino package manager. 
 
-UNLESS OTHERWISE SEPARATELY UNDERTAKEN BY THE LICENSOR, TO THE EXTENT POSSIBLE, THE LICENSOR OFFERS THE LICENSED MATERIAL AS-IS AND AS-AVAILABLE, AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND CONCERNING THE LICENSED MATERIAL, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHER. THIS INCLUDES, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, ABSENCE OF LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OR ABSENCE OF ERRORS, WHETHER OR NOT KNOWN OR DISCOVERABLE. WHERE DISCLAIMERS OF WARRANTIES ARE NOT ALLOWED IN FULL OR IN PART, THIS DISCLAIMER MAY NOT APPLY TO YOU.
+Documentation
+--------------
 
-TO THE EXTENT POSSIBLE, IN NO EVENT WILL THE LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY (INCLUDING, WITHOUT LIMITATION, NEGLIGENCE) OR OTHERWISE FOR ANY DIRECT, SPECIAL, INDIRECT, INCIDENTAL, CONSEQUENTIAL, PUNITIVE, EXEMPLARY, OR OTHER LOSSES, COSTS, EXPENSES, OR DAMAGES ARISING OUT OF THIS PUBLIC LICENSE OR USE OF THE LICENSED MATERIAL, EVEN IF THE LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH LOSSES, COSTS, EXPENSES, OR DAMAGES. WHERE A LIMITATION OF LIABILITY IS NOT ALLOWED IN FULL OR IN PART, THIS LIMITATION MAY NOT APPLY TO YOU.
+* **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
+* **[Product Repository](https://github.com/sparkfun/HTU21D_Breakout)** - Main repository (including hardware files) for the HTU21D breakout board.
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/htu21d-humidity-sensor-hookup-guide?_ga=1.239533187.1678495895.1378918345)** - Basic hookup guide for the  HTU21D breakout board.
 
-THE DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY PROVIDED ABOVE SHALL BE INTERPRETED IN A MANNER THAT, TO THE EXTENT POSSIBLE, MOST CLOSELY APPROXIMATES AN ABSOLUTE DISCLAIMER AND WAIVER OF ALL LIABILITY.
+License Information
+-------------------
 
+This product is _**open source**_! 
+
+The **code** is beerware; if you see me (or any other SparkFun employee) at the local, and you've found our code helpful, please buy us a round!
+
+Please use, reuse, and modify these files as you see fit. Please maintain attribution to SparkFun Electronics and release anything derivative under the same license.
+
+Distributed as-is; no warranty is given.
+
+- Your friends at SparkFun.
