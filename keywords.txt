@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map 
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+MAX30105 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin			KEYWORD2
+setup 			KEYWORD2
+available		KEYWORD2
+getRed			KEYWORD2
+getIR			KEYWORD2
+getGreen		KEYWORD2
+readTemperature 	KEYWORD2
+readTemperatureF 	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
