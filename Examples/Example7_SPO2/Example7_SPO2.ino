@@ -6,13 +6,23 @@
 
   This demo shows heart rate and SPO2 levels.
 
-  It is best to attach the sensor to your finger using a rubber band. Humans are generally
-  bad at applying the same amount of pressure to a thing and when you press your finger
-  against the sensor it varies enough to cause the sensor readings to go wonky.
+  It is best to attach the sensor to your finger using a rubber band or other tightening 
+  device. Humans are generally bad at applying constant pressure to a thing. When you 
+  press your finger against the sensor it varies enough to cause the blood in your 
+  finger to flow differently which causes the sensor readings to go wonky.
 
   This example is based on MAXREFDES117 and RD117_LILYPAD.ino from Maxim. Their example
   was modified to work with the SparkFun MAX30105 library and to compile under Arduino 1.6.11
   Please see license file for more info.
+
+  Hardware Connections (Breakoutboard to Arduino):
+  -5V = 5V
+  -GND = GND
+  -SDA = A4 (or SDA)
+  -SCL = A5 (or SCL)
+  -INT = Not connected
+ 
+  The MAX30105 Breakout can handle 5V or 3.3V I2C logic but requires 5V to power the sensor.
 */
 
 #include <Wire.h>

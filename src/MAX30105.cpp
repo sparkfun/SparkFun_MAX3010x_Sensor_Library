@@ -16,9 +16,9 @@
 const int STORAGE_SIZE = 2; //Each long is 4 bytes so limit this to fit on your micro
 struct Record
 {
-  long red[STORAGE_SIZE];
-  long IR[STORAGE_SIZE];
-  long green[STORAGE_SIZE];
+  uint32_t red[STORAGE_SIZE];
+  uint32_t IR[STORAGE_SIZE];
+  uint32_t green[STORAGE_SIZE];
   byte head;
   byte tail;
 } sense; //This is our circular buffer of readings from the sensor
@@ -488,8 +488,8 @@ uint16_t MAX30105::check(void)
       
       while (toGet > 0)
       {
-        byte temp[sizeof(long)]; //Array of 4 bytes that we will convert into long
-        long tempLong;
+        byte temp[sizeof(uint32_t)]; //Array of 4 bytes that we will convert into long
+        uint32_t tempLong;
 
         //Burst read three bytes - RED
         temp[3] = 0;
@@ -499,6 +499,8 @@ uint16_t MAX30105::check(void)
 
         //Convert array to long
         memcpy(&tempLong, temp, sizeof(tempLong));
+		
+		tempLong &= 0x3FFFF; //Zero out all but 18 bits
 
         sense.red[sense.head] = tempLong; //Store this reading into the sense array
 
@@ -513,7 +515,9 @@ uint16_t MAX30105::check(void)
           //Convert array to long
           memcpy(&tempLong, temp, sizeof(tempLong));
 
-          sense.IR[sense.head] = tempLong;
+		  tempLong &= 0x3FFFF; //Zero out all but 18 bits
+          
+		  sense.IR[sense.head] = tempLong;
         }
 
         if (activeLEDs > 2)
@@ -526,6 +530,8 @@ uint16_t MAX30105::check(void)
 
           //Convert array to long
           memcpy(&tempLong, temp, sizeof(tempLong));
+
+		  tempLong &= 0x3FFFF; //Zero out all but 18 bits
 
           sense.green[sense.head] = tempLong;
         }

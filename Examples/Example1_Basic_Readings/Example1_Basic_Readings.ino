@@ -6,6 +6,15 @@
 
   Outputs all Red/IR/Green values at 25Hz.
 
+  Hardware Connections (Breakoutboard to Arduino):
+  -5V = 5V
+  -GND = GND
+  -SDA = A4 (or SDA)
+  -SCL = A5 (or SCL)
+  -INT = Not connected
+ 
+  The MAX30105 Breakout can handle 5V or 3.3V I2C logic but requires 5V to power the sensor.
+
 */
 
 #include <Wire.h>
@@ -28,8 +37,8 @@ void setup()
     while (1);
   }
 
-  //particleSensor.setup(); //Configure sensor. Use 6.4mA for LED drive
-  particleSensor.setup(0x7F); //Configure sensor. Use 25mA for LED drive
+  particleSensor.setup(); //Configure sensor. Use 6.4mA for LED drive
+  //particleSensor.setup(0x7F); //Configure sensor. Use 25mA for LED drive
 
   startTime = millis();
 }

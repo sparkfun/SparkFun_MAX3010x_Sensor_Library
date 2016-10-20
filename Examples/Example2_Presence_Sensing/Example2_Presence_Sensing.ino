@@ -6,7 +6,16 @@
 
   This takes an average reading at power up and if the reading changes more than 100
   then print 'Something is there!'.
-  
+
+  Hardware Connections (Breakoutboard to Arduino):
+  -5V = 5V
+  -GND = GND
+  -SDA = A4 (or SDA)
+  -SCL = A5 (or SCL)
+  -INT = Not connected
+ 
+  The MAX30105 Breakout can handle 5V or 3.3V I2C logic but requires 5V to power the sensor.
+
 */
 
 #include <Wire.h>
@@ -31,7 +40,16 @@ void setup()
     while (1);
   }
 
-  particleSensor.setup(0x7F); //Configure sensor. Use 25mA for LED drive
+  //Setup to sense up to 18 inches, max LED brightness
+  byte ledBrightness = 0xFF; //Options: 0=Off to 255=50mA
+  byte sampleAverage = 4; //Options: 1, 2, 4, 8, 16, 32
+  byte ledMode = 2; //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
+  byte sampleRate = 400; //Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
+  int pulseWidth = 411; //Options: 69, 118, 215, 411
+  int adcRange = 2048; //Options: 2048, 4096, 8192, 16384
+
+  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
+
   particleSensor.setPulseAmplitudeRed(0); //Turn off Red LED
   particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
 
@@ -70,7 +88,7 @@ void loop()
 
     long currentDelta = particleSensor.getIR() - unblockedValue;
 
-    Serial.print(" CD[");
+    Serial.print(" delta[");
     Serial.print(currentDelta);
     Serial.print("]");
 

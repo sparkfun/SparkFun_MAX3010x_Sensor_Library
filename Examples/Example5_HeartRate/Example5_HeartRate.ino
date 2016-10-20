@@ -7,7 +7,19 @@
   This is a demo to show the reading of heart rate or beats per minute (BPM) using
   a Penpheral Beat Amplitude (PBA) algorithm.
 
+  It is best to attach the sensor to your finger using a rubber band or other tightening 
+  device. Humans are generally bad at applying constant pressure to a thing. When you 
+  press your finger against the sensor it varies enough to cause the blood in your 
+  finger to flow differently which causes the sensor readings to go wonky.
 
+  Hardware Connections (Breakoutboard to Arduino):
+  -5V = 5V
+  -GND = GND
+  -SDA = A4 (or SDA)
+  -SCL = A5 (or SCL)
+  -INT = Not connected
+ 
+  The MAX30105 Breakout can handle 5V or 3.3V I2C logic but requires 5V to power the sensor.
 */
 
 #include <Wire.h>
