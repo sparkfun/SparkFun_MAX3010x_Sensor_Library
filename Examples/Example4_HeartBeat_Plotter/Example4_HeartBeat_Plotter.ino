@@ -20,13 +20,14 @@
   finger to flow differently which causes the sensor readings to go wonky.
 
   Hardware Connections (Breakoutboard to Arduino):
-  -5V = 5V
+  -5V = 5V (3.3V is allowed)
   -GND = GND
   -SDA = A4 (or SDA)
   -SCL = A5 (or SCL)
   -INT = Not connected
-
-  The MAX30105 Breakout can handle 5V or 3.3V I2C logic but requires 5V to power the sensor.
+ 
+  The MAX30105 Breakout can handle 5V or 3.3V I2C logic. We recommend powering the board with 5V
+  but it will also run at 3.3V.
 */
 
 #include <Wire.h>
@@ -37,6 +38,7 @@ MAX30105 particleSensor;
 void setup()
 {
   Serial.begin(115200);
+  Serial.println("Initializing...");
 
   // Initialize sensor
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
