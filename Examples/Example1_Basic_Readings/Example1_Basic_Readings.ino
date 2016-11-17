@@ -15,7 +15,6 @@
  
   The MAX30105 Breakout can handle 5V or 3.3V I2C logic. We recommend powering the board with 5V
   but it will also run at 3.3V.
-
 */
 
 #include <Wire.h>
@@ -39,7 +38,6 @@ void setup()
   }
 
   particleSensor.setup(); //Configure sensor. Use 6.4mA for LED drive
-  //particleSensor.setup(0x7F); //Configure sensor. Use 25mA for LED drive
 
   startTime = millis();
 }
