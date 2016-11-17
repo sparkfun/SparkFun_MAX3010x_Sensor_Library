@@ -62,6 +62,6 @@
 #endif
 
 bool checkForBeat(long sample);
-int averageDCEstimator(long *p, unsigned int x);
-int lowPassFIRFilter(int din);
-int long mul16(int x, int y);
+int16_t averageDCEstimator(long *p, uint16_t x);
+int16_t lowPassFIRFilter(int16_t din);
+int32_t mul16(int16_t x, int16_t y);

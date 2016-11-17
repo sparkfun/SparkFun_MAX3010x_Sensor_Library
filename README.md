@@ -1,13 +1,19 @@
 SparkFun MAX301x Particle Sensor Library
 ===========================================================
 
-![SparkFun Humidity and Temperature Sensor Breakout - HTU21D](https://dlnmh9ip6v2uc.cloudfront.net/images/products/1/2/0/6/4/12064-04.jpg)  
+![SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105](https://dlnmh9ip6v2uc.cloudfront.net/images/products/1/2/0/6/4/12064-04.jpg)  
 
-[*SparkFun Humidity and Temperature Sensor Breakout - HTU21D (SEN-12064)*](https://www.sparkfun.com/products/12064)
+[*SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105 (SEN-14045)*](https://www.sparkfun.com/products/14045)
+
+![A graph of a heartbeat](https://raw.githubusercontent.com/sparkfun/SparkFun_MAX3010x_Sensor_Library/master/extras/HeartBeat.jpg)  
+
+[*SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105 (SEN-14045)*](https://www.sparkfun.com/products/14045)
 
 This is a breadboard friendly breakout board for the Maxim MAX30105 reflectance, particle, and pulse ox sensor.
 
-Written by Peter Janen ([Open Sensing Lab](https://github.com/opensensinglab)) and Nathan Seidle ([SparkFun](http://www.sparkfun.com)).
+This library should work with other MAX3010x sensors including the MAX30102, MAX30101, and MAX30100. 
+
+Library written by Nathan Seidle ([SparkFun](http://www.sparkfun.com)) and Peter Jansen ([Open Sensing Lab](https://github.com/opensensinglab)).
 
 Repository Contents
 -------------------
@@ -22,14 +28,14 @@ Documentation
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
 * **[Product Repository](https://github.com/sparkfun/HTU21D_Breakout)** - Main repository (including hardware files) for the HTU21D breakout board.
-* **[Hookup Guide](https://learn.sparkfun.com/tutorials/htu21d-humidity-sensor-hookup-guide?_ga=1.239533187.1678495895.1378918345)** - Basic hookup guide for the  HTU21D breakout board.
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/max30105-particle-and-pulse-ox-sensor-hookup-guide)** - Basic hookup guide for the MAX30105 Particle Sensor breakout board.
 
 License Information
 -------------------
 
 This product is _**open source**_! 
 
-The **code** is beerware; if you see me (or any other SparkFun employee) at the local, and you've found our code helpful, please buy us a round!
+Various bits of the code have different licenses applied. Anything SparkFun wrote is beerware; if you see me (or any other SparkFun employee) at the local, and you've found our code helpful, please buy us a round! Anything Maxim wrote has its own license. Anything that was co-writing with Peter Jansen is BSD.
 
 Please use, reuse, and modify these files as you see fit. Please maintain attribution to SparkFun Electronics and release anything derivative under the same license.
 

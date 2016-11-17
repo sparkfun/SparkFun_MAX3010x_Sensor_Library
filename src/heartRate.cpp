@@ -57,28 +57,28 @@
 
 #include "heartRate.h"
 
-int IR_AC_Max = 20;
-int IR_AC_Min = -20;
+int16_t IR_AC_Max = 20;
+int16_t IR_AC_Min = -20;
 
-int IR_AC_Signal_Current = 0;
-int IR_AC_Signal_Previous;
-int IR_AC_Signal_min = 0;
-int IR_AC_Signal_max = 0;
-int IR_Average_Estimated;
+int16_t IR_AC_Signal_Current = 0;
+int16_t IR_AC_Signal_Previous;
+int16_t IR_AC_Signal_min = 0;
+int16_t IR_AC_Signal_max = 0;
+int16_t IR_Average_Estimated;
 
-int positiveEdge = 0;
-int negativeEdge = 0;
-long ir_avg_reg = 0;
+int16_t positiveEdge = 0;
+int16_t negativeEdge = 0;
+int32_t ir_avg_reg = 0;
 
-int cbuf[32];
+int16_t cbuf[32];
 uint8_t offset = 0;
 
-static const unsigned int FIRCoeffs[12] = {172, 321, 579, 927, 1360, 1858, 2390, 2916, 3391, 3768, 4012, 4096};
+static const uint16_t FIRCoeffs[12] = {172, 321, 579, 927, 1360, 1858, 2390, 2916, 3391, 3768, 4012, 4096};
 
 //  Heart Rate Monitor functions takes a sample value and the sample number
 //  Returns true if a beat is detected
 //  A running average of four samples is recommended for display on the screen.
-bool checkForBeat(long sample)
+bool checkForBeat(int32_t sample)
 {
   bool beatDetected = false;
 
@@ -136,20 +136,20 @@ bool checkForBeat(long sample)
 }
 
 //  Average DC Estimator
-int averageDCEstimator(long *p, unsigned int x)
+int16_t averageDCEstimator(int32_t *p, uint16_t x)
 {
   *p += ((((long) x << 15) - *p) >> 4);
   return (*p >> 15);
 }
 
 //  Low Pass FIR Filter
-int lowPassFIRFilter(int din)
+int16_t lowPassFIRFilter(int16_t din)
 {  
   cbuf[offset] = din;
 
-  int long z = mul16(FIRCoeffs[11], cbuf[(offset - 11) & 0x1F]);
+  int32_t z = mul16(FIRCoeffs[11], cbuf[(offset - 11) & 0x1F]);
 
-  for (int i = 0 ; i < 11 ; i++)
+  for (uint8_t i = 0 ; i < 11 ; i++)
   {
     z += mul16(FIRCoeffs[i], cbuf[(offset - i) & 0x1F] + cbuf[(offset - 22 + i) & 0x1F]);
   }
@@ -161,7 +161,7 @@ int lowPassFIRFilter(int din)
 }
 
 //  Integer multiplier
-int long mul16(int x, int y)
+int32_t mul16(int16_t x, int16_t y)
 {
   return((long)x * (long)y);
 }
