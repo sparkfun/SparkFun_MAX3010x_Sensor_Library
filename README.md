@@ -1,7 +1,7 @@
 SparkFun MAX301x Particle Sensor Library
 ===========================================================
 
-![SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105](https://dlnmh9ip6v2uc.cloudfront.net/images/products/1/2/0/6/4/12064-04.jpg)  
+![SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105](https://cdn.sparkfun.com/assets/parts/1/1/8/7/4/14045-02.jpg)](https://cdn.sparkfun.com/assets/parts/1/1/8/7/4/14045-02.jpg)  
 
 [*SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105 (SEN-14045)*](https://www.sparkfun.com/products/14045)
 
