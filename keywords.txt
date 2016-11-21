@@ -58,6 +58,9 @@ enableFIFORollover		KEYWORD2
 disableFIFORollover		KEYWORD2
 setFIFOAlmostFull		KEYWORD2
   
+getFIFORed			KEYWORD2
+getFIFOIR			KEYWORD2
+getFIFOGreen		KEYWORD2
 getWritePointer		KEYWORD2
 getReadPointer		KEYWORD2
 clearFIFO		KEYWORD2

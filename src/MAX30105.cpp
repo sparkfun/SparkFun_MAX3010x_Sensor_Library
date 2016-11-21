@@ -373,7 +373,6 @@ uint8_t MAX30105::getReadPointer(void) {
 }
 
 
-//
 // Die Temperature
 // Returns temp in C
 float MAX30105::readTemperature() {
@@ -532,20 +531,50 @@ uint8_t MAX30105::available(void)
   return (numberOfSamples);
 }
 
-//Report oldest red value
+//Report the most recent red value
 uint32_t MAX30105::getRed(void)
+{
+  //Check the sensor for new data for 250ms
+  if(safeCheck(250))
+    return (sense.red[sense.head]);
+  else
+    return(0); //Sensor failed to find new data
+}
+
+//Report the most recent IR value
+uint32_t MAX30105::getIR(void)
+{
+  //Check the sensor for new data for 250ms
+  if(safeCheck(250))
+    return (sense.IR[sense.head]);
+  else
+    return(0); //Sensor failed to find new data
+}
+
+//Report the most recent Green value
+uint32_t MAX30105::getGreen(void)
+{
+  //Check the sensor for new data for 250ms
+  if(safeCheck(250))
+    return (sense.green[sense.head]);
+  else
+    return(0); //Sensor failed to find new data
+}
+
+//Report the next Red value in the FIFO
+uint32_t MAX30105::getFIFORed(void)
 {
   return (sense.red[sense.tail]);
 }
 
-//Report oldest IR value
-uint32_t MAX30105::getIR(void)
+//Report the next IR value in the FIFO
+uint32_t MAX30105::getFIFOIR(void)
 {
   return (sense.IR[sense.tail]);
 }
 
-//Report oldest Green value
-uint32_t MAX30105::getGreen(void)
+//Report the next Green value in the FIFO
+uint32_t MAX30105::getFIFOGreen(void)
 {
   return (sense.green[sense.tail]);
 }
@@ -612,6 +641,9 @@ uint16_t MAX30105::check(void)
       
       while (toGet > 0)
       {
+        sense.head++; //Advance the head of the storage struct
+        sense.head %= STORAGE_SIZE; //Wrap condition
+
         byte temp[sizeof(uint32_t)]; //Array of 4 bytes that we will convert into long
         uint32_t tempLong;
 
@@ -661,9 +693,6 @@ uint16_t MAX30105::check(void)
         }
 
         toGet -= activeLEDs * 3;
-
-        sense.head++; //Advance the storage struct in the local processor
-        sense.head %= STORAGE_SIZE; //Wrap condition
       }
 
     } //End while (bytesLeftToRead > 0)
@@ -673,6 +702,23 @@ uint16_t MAX30105::check(void)
   return (numberOfSamples); //Let the world know how much new data we found
 }
 
+//Check for new data but give up after a certain amount of time
+//Returns true if new data was found
+//Returns false if new data was not found
+bool MAX30105::safeCheck(uint8_t maxTimeToCheck)
+{
+  uint32_t markTime = millis();
+  
+  while(1)
+  {
+	if(millis() - markTime > maxTimeToCheck) return(false);
+
+	if(check() == true) //We found new data!
+	  return(true);
+
+	delay(1);
+  }
+}
 
 //Given a register, read it, mask it, and then set the thing
 void MAX30105::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)

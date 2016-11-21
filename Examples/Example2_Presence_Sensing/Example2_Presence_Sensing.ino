@@ -13,7 +13,7 @@
   -SDA = A4 (or SDA)
   -SCL = A5 (or SCL)
   -INT = Not connected
- 
+
   The MAX30105 Breakout can handle 5V or 3.3V I2C logic. We recommend powering the board with 5V
   but it will also run at 3.3V.
 
@@ -24,10 +24,9 @@
 
 MAX30105 particleSensor;
 
-long startTime;
 long samplesTaken = 0; //Counter for calculating the Hz or read rate
-
 long unblockedValue; //Average IR at power up
+long startTime; //Used to calculate measurement rate
 
 void setup()
 {
@@ -58,14 +57,7 @@ void setup()
   unblockedValue = 0;
   for (byte x = 0 ; x < 32 ; x++)
   {
-    //Wait for new readings to come in
-    while (particleSensor.available() == false)
-    {
-      particleSensor.check(); //Check the sensor, read up to 3 samples
-    }
-
     unblockedValue += particleSensor.getIR(); //Read the IR value
-    particleSensor.nextSample(); //We're finished with this sample so move to next sample
   }
   unblockedValue /= 32;
 
@@ -74,31 +66,24 @@ void setup()
 
 void loop()
 {
-  particleSensor.check(); //Check the sensor, read up to 3 samples
+  samplesTaken++;
 
-  while (particleSensor.available()) //do we have new data?
+  Serial.print("IR[");
+  Serial.print(particleSensor.getIR());
+  Serial.print("] Hz[");
+  Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
+  Serial.print("]");
+
+  long currentDelta = particleSensor.getIR() - unblockedValue;
+
+  Serial.print(" delta[");
+  Serial.print(currentDelta);
+  Serial.print("]");
+
+  if (currentDelta > (long)100)
   {
-    samplesTaken++;
-
-    Serial.print("IR[");
-    Serial.print(particleSensor.getIR());
-    Serial.print("] Hz[");
-    Serial.print((float)samplesTaken / ((millis() - startTime) / 1000.0), 2);
-    Serial.print("]");
-
-    long currentDelta = particleSensor.getIR() - unblockedValue;
-
-    Serial.print(" delta[");
-    Serial.print(currentDelta);
-    Serial.print("]");
-
-    if (currentDelta > (long)100)
-    {
-      Serial.print(" Something is there!");
-    }
-
-    Serial.println();
-
-    particleSensor.nextSample(); //We're finished with this sample so move to next sample
+    Serial.print(" Something is there!");
   }
+
+  Serial.println();
 }

@@ -14,9 +14,9 @@
   5) Checkout the blips!
   6) Feel the pulse on your neck and watch it mimic the blips
 
-  It is best to attach the sensor to your finger using a rubber band or other tightening 
-  device. Humans are generally bad at applying constant pressure to a thing. When you 
-  press your finger against the sensor it varies enough to cause the blood in your 
+  It is best to attach the sensor to your finger using a rubber band or other tightening
+  device. Humans are generally bad at applying constant pressure to a thing. When you
+  press your finger against the sensor it varies enough to cause the blood in your
   finger to flow differently which causes the sensor readings to go wonky.
 
   Hardware Connections (Breakoutboard to Arduino):
@@ -25,7 +25,7 @@
   -SDA = A4 (or SDA)
   -SCL = A5 (or SCL)
   -INT = Not connected
- 
+
   The MAX30105 Breakout can handle 5V or 3.3V I2C logic. We recommend powering the board with 5V
   but it will also run at 3.3V.
 */
@@ -47,7 +47,15 @@ void setup()
     while (1);
   }
 
-  particleSensor.setup(); //Configure sensor. Use 6.4mA for LED drive
+  //Setup to sense a nice looking saw tooth on the plotter
+  byte ledBrightness = 0x1F; //Options: 0=Off to 255=50mA
+  byte sampleAverage = 8; //Options: 1, 2, 4, 8, 16, 32
+  byte ledMode = 3; //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
+  byte sampleRate = 100; //Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
+  int pulseWidth = 411; //Options: 69, 118, 215, 411
+  int adcRange = 4096; //Options: 2048, 4096, 8192, 16384
+
+  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
 
   //Arduino plotter auto-scales annoyingly. To get around this, pre-populate
   //the plotter with 500 of an average reading from the sensor
@@ -57,29 +65,16 @@ void setup()
   long baseValue = 0;
   for (byte x = 0 ; x < avgAmount ; x++)
   {
-    //Wait for new readings to come in
-    while (particleSensor.available() == false)
-    {
-      particleSensor.check(); //Check the sensor, read up to 3 samples
-    }
-
     baseValue += particleSensor.getIR(); //Read the IR value
-    particleSensor.nextSample(); //We're finished with this sample so move to next sample
   }
   baseValue /= avgAmount;
 
+  //Pre-populate the plotter so that the Y scale is close to IR values
   for (int x = 0 ; x < 500 ; x++)
     Serial.println(baseValue);
 }
 
 void loop()
 {
-  particleSensor.check(); //Check the sensor, read up to 3 samples
-
-  while (particleSensor.available()) //do we have new data?
-  {
-    Serial.println(particleSensor.getIR());
-
-    particleSensor.nextSample(); //We're finished with this sample so move to next sample
-  }
+  Serial.println(particleSensor.getIR()); //Send raw data to plotter
 }

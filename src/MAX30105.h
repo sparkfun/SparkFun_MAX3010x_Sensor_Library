@@ -31,6 +31,11 @@ class MAX30105 {
 
   boolean begin(TwoWire &wirePort = Wire, uint32_t i2cSpeed = I2C_SPEED_STANDARD, uint8_t i2caddr = MAX30105_ADDRESS);
 
+  uint32_t getRed(void); //Returns immediate red value
+  uint32_t getIR(void); //Returns immediate IR value
+  uint32_t getGreen(void); //Returns immediate green value
+  bool safeCheck(uint8_t maxTimeToCheck); //Given a max amount of time, check for new data
+
   // Configuration
   void softReset();
   void shutDown(); 
@@ -76,15 +81,16 @@ class MAX30105 {
   void setFIFOAlmostFull(uint8_t samples);
   
   //FIFO Reading
-  uint16_t check(void);
+  uint16_t check(void); //Checks for new data and fills FIFO
+  uint8_t available(void); //Tells caller how many new samples are available (head - tail)
+  void nextSample(void); //Advances the tail of the sense array
+  uint32_t getFIFORed(void); //Returns the FIFO sample pointed to by tail
+  uint32_t getFIFOIR(void); //Returns the FIFO sample pointed to by tail
+  uint32_t getFIFOGreen(void); //Returns the FIFO sample pointed to by tail
+
   uint8_t getWritePointer(void);
   uint8_t getReadPointer(void);
   void clearFIFO(void); //Sets the read/write pointers to zero
-  uint8_t available(void); //Tells caller how many new samples are available
-  uint32_t getRed(void); //Returns the oldest red value. 
-  uint32_t getIR(void); //Returns the oldest IR value. 
-  uint32_t getGreen(void); //Returns the oldest green value.
-  void nextSample(void); //Advances the tail of the sense array
 
   //Proximity Mode Interrupt Threshold
   void setPROXINTTHRESH(uint8_t val);
@@ -98,7 +104,7 @@ class MAX30105 {
   uint8_t readPartID();  
 
   // Setup the IC with user selectable settings
-  void setup(byte powerLevel = 0x1F, byte sampleAverage = 4, byte ledMode = 3, int sampleRate = 100, int pulseWidth = 411, int adcRange = 4096);
+  void setup(byte powerLevel = 0x1F, byte sampleAverage = 4, byte ledMode = 3, int sampleRate = 400, int pulseWidth = 411, int adcRange = 4096);
 
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);

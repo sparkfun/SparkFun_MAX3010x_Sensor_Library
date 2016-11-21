@@ -148,7 +148,7 @@ int16_t lowPassFIRFilter(int16_t din)
   cbuf[offset] = din;
 
   int32_t z = mul16(FIRCoeffs[11], cbuf[(offset - 11) & 0x1F]);
-
+  
   for (uint8_t i = 0 ; i < 11 ; i++)
   {
     z += mul16(FIRCoeffs[i], cbuf[(offset - i) & 0x1F] + cbuf[(offset - 22 + i) & 0x1F]);
