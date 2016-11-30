@@ -5,7 +5,7 @@ SparkFun MAX301x Particle Sensor Library
 
 [*SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105 (SEN-14045)*](https://www.sparkfun.com/products/14045)
 
-![A graph of a heartbeat](https://raw.githubusercontent.com/sparkfun/SparkFun_MAX3010x_Sensor_Library/master/extras/HeartBeat.jpg)  
+![A graph of a heartbeat](https://raw.githubusercontent.com/sparkfun/SparkFun_MAX3010x_Sensor_Library/master/extras/HeartBeat1.jpg)  
 
 [*SparkFun Reflectance, Particle, and Pulse Ox sensor - MAX30105 (SEN-14045)*](https://www.sparkfun.com/products/14045)
 
