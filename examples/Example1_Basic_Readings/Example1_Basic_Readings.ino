@@ -24,15 +24,18 @@
 
 MAX30105 particleSensor;
 
+#define debug Serial //Uncomment this line if you're using an Uno or ESP
+//#define debug SerialUSB //Uncomment this line if you're using a SAMD21
+
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("Initializing...");
+  debug.begin(115200);
+  debug.println("Initializing...");
 
   // Initialize sensor
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
   {
-    Serial.println("MAX30105 was not found. Please check wiring/power. ");
+    debug.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);
   }
 
@@ -41,13 +44,13 @@ void setup()
 
 void loop()
 {
-  Serial.print(" R[");
-  Serial.print(particleSensor.getRed());
-  Serial.print("] IR[");
-  Serial.print(particleSensor.getIR());
-  Serial.print("] G[");
-  Serial.print(particleSensor.getGreen());
-  Serial.print("]");
+  debug.print(" R[");
+  debug.print(particleSensor.getRed());
+  debug.print("] IR[");
+  debug.print(particleSensor.getIR());
+  debug.print("] G[");
+  debug.print(particleSensor.getGreen());
+  debug.print("]");
 
-  Serial.println();
+  debug.println();
 }

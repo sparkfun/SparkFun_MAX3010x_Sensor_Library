@@ -25,6 +25,24 @@
 #define I2C_SPEED_STANDARD        100000
 #define I2C_SPEED_FAST            400000
 
+//Define the size of the I2C buffer based on the platform the user has
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+
+  //I2C_BUFFER_LENGTH is defined in Wire.H
+  #define I2C_BUFFER_LENGTH BUFFER_LENGTH
+
+#elif defined(__SAMD21G18A__)
+
+  //SAMD21 uses RingBuffer.h
+  #define I2C_BUFFER_LENGTH SERIAL_BUFFER_SIZE
+
+#else
+
+  //The catch-all default is 32
+  #define I2C_BUFFER_LENGTH 32
+
+#endif
+
 class MAX30105 {
  public: 
   MAX30105(void);

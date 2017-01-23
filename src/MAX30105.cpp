@@ -619,19 +619,19 @@ uint16_t MAX30105::check(void)
     _i2cPort->write(MAX30105_FIFODATA);
     _i2cPort->endTransmission();
 
+    //We may need to read as many as 288 bytes so we read in blocks no larger than I2C_BUFFER_LENGTH
+    //I2C_BUFFER_LENGTH changes based on the platform. 64 bytes for SAMD21, 32 bytes for Uno.
     //Wire.requestFrom() is limited to BUFFER_LENGTH which is 32 on the Uno
-    //We may need to read as many as 288 bytes so we read in blocks no larger than 32
-    //BUFFER_LENGTH should work with other platforms with larger requestFrom buffers
     while (bytesLeftToRead > 0)
     {
       int toGet = bytesLeftToRead;
-      if (toGet > BUFFER_LENGTH)
+      if (toGet > I2C_BUFFER_LENGTH)
       {
         //If toGet is 32 this is bad because we read 6 bytes (Red+IR * 3 = 6) at a time
         //32 % 6 = 2 left over. We don't want to request 32 bytes, we want to request 30.
         //32 % 9 (Red+IR+GREEN) = 5 left over. We want to request 27.
 
-        toGet = BUFFER_LENGTH - (BUFFER_LENGTH % (activeLEDs * 3)); //Trim toGet to be a multiple of the samples we need to read
+        toGet = I2C_BUFFER_LENGTH - (I2C_BUFFER_LENGTH % (activeLEDs * 3)); //Trim toGet to be a multiple of the samples we need to read
       }
 
       bytesLeftToRead -= toGet;
