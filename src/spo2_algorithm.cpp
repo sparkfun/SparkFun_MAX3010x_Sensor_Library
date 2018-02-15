@@ -57,7 +57,7 @@
 *******************************************************************************
 */
 
-#include "arduino.h"
+#include "Arduino.h"
 #include "spo2_algorithm.h"
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
@@ -67,7 +67,7 @@ void maxim_heart_rate_and_oxygen_saturation(uint16_t *pun_ir_buffer, int32_t n_i
                 int32_t *pn_heart_rate, int8_t *pch_hr_valid)
 #else
 void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_buffer_length, uint32_t *pun_red_buffer, int32_t *pn_spo2, int8_t *pch_spo2_valid, 
-                int32_t *pn_heart_rate, int8_t *pch_hr_valid)
+                //int32_t *pn_heart_rate, int8_t *pch_hr_valid)
 #endif
 /**
 * \brief        Calculate the heart rate and SpO2 level
@@ -87,17 +87,18 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_i
 * \retval       None
 */
 {
-  uint32_t un_ir_mean,un_only_once ;
+  uint32_t un_ir_mean;
   int32_t k, n_i_ratio_count;
-  int32_t i, s, m, n_exact_ir_valley_locs_count, n_middle_idx;
-  int32_t n_th1, n_npks, n_c_min;   
+  int32_t i, n_exact_ir_valley_locs_count, n_middle_idx;
+  int32_t n_th1, n_npks;   
   int32_t an_ir_valley_locs[15] ;
   int32_t n_peak_interval_sum;
   
   int32_t n_y_ac, n_x_ac;
   int32_t n_spo2_calc; 
   int32_t n_y_dc_max, n_x_dc_max; 
-  int32_t n_y_dc_max_idx, n_x_dc_max_idx; 
+  int32_t n_y_dc_max_idx = 0;
+  int32_t n_x_dc_max_idx = 0; 
   int32_t an_ratio[5], n_ratio_average; 
   int32_t n_nume, n_denom ;
 

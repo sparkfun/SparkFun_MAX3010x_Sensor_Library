@@ -740,17 +740,15 @@ uint8_t MAX30105::readRegister8(uint8_t address, uint8_t reg) {
   _i2cPort->beginTransmission(address);
   _i2cPort->write(reg);
   _i2cPort->endTransmission(false);
-  _i2cPort->requestFrom(address, 1);   // Request 1 byte
 
-  int tries = 0;
-  while (!_i2cPort->available())
+  _i2cPort->requestFrom((uint8_t)address, (uint8_t)1); // Request 1 byte
+  if (_i2cPort->available())
   {
-    delay(1);
-    if (tries++ > 200) break;
+    return(_i2cPort->read());
   }
-  if (tries == 200) return (0); //Fail
 
-  return (_i2cPort->read());
+  return (0); //Fail
+
 }
 
 void MAX30105::writeRegister8(uint8_t address, uint8_t reg, uint8_t value) {

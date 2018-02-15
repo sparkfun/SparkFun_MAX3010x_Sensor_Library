@@ -62,12 +62,12 @@
 #ifndef SPO2_ALGORITHM_H_
 #define SPO2_ALGORITHM_H_
 
-#include <arduino.h>
+#include <Arduino.h>
 
 #define FS 25    //sampling frequency
 #define BUFFER_SIZE (FS * 4) 
 #define MA4_SIZE 4 // DONOT CHANGE
-#define min(x,y) ((x) < (y) ? (x) : (y))
+//#define min(x,y) ((x) < (y) ? (x) : (y)) //Defined in Arduino.h
 
 //uch_spo2_table is approximated as  -45.060*ratioAverage* ratioAverage + 30.354 *ratioAverage + 94.845 ;
 const uint8_t uch_spo2_table[184]={ 95, 95, 95, 96, 96, 96, 97, 97, 97, 97, 97, 98, 98, 98, 98, 98, 99, 99, 99, 99, 
