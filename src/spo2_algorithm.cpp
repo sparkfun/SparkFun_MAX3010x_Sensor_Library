@@ -67,7 +67,7 @@ void maxim_heart_rate_and_oxygen_saturation(uint16_t *pun_ir_buffer, int32_t n_i
                 int32_t *pn_heart_rate, int8_t *pch_hr_valid)
 #else
 void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_buffer_length, uint32_t *pun_red_buffer, int32_t *pn_spo2, int8_t *pch_spo2_valid, 
-                //int32_t *pn_heart_rate, int8_t *pch_hr_valid)
+                int32_t *pn_heart_rate, int8_t *pch_hr_valid)
 #endif
 /**
 * \brief        Calculate the heart rate and SpO2 level
@@ -131,7 +131,7 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_i
   if (n_npks>=2){
     for (k=1; k<n_npks; k++) n_peak_interval_sum += (an_ir_valley_locs[k] -an_ir_valley_locs[k -1] ) ;
     n_peak_interval_sum =n_peak_interval_sum/(n_npks-1);
-    *pn_heart_rate =(int32_t)( (FS*60)/ n_peak_interval_sum );
+    *pn_heart_rate =(int32_t)( (FreqS*60)/ n_peak_interval_sum );
     *pch_hr_valid  = 1;
   }
   else  { 

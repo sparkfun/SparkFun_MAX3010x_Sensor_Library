@@ -64,8 +64,8 @@
 
 #include <Arduino.h>
 
-#define FS 25    //sampling frequency
-#define BUFFER_SIZE (FS * 4) 
+#define FreqS 25    //sampling frequency
+#define BUFFER_SIZE (FreqS * 4) 
 #define MA4_SIZE 4 // DONOT CHANGE
 //#define min(x,y) ((x) < (y) ? (x) : (y)) //Defined in Arduino.h
 
