@@ -525,7 +525,7 @@ void MAX30105::setup(byte powerLevel, byte sampleAverage, byte ledMode, int samp
 //Tell caller how many samples are available
 uint8_t MAX30105::available(void)
 {
-  uint8_t numberOfSamples = sense.head - sense.tail;
+  int8_t numberOfSamples = sense.head - sense.tail;
   if (numberOfSamples < 0) numberOfSamples += STORAGE_SIZE;
 
   return (numberOfSamples);
