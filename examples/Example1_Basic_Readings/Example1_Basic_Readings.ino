@@ -29,11 +29,11 @@ MAX30105 particleSensor;
 
 void setup()
 {
-  debug.begin(115200);
-  debug.println("Initializing...");
+  debug.begin(9600);
+  debug.println("MAX30105 Basic Readings Example");
 
   // Initialize sensor
-  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
+  if (particleSensor.begin() == false)
   {
     debug.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);

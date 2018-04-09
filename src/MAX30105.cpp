@@ -160,7 +160,7 @@ boolean MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
 
   _i2caddr = i2caddr;
 
-  // Step 1: Initial Communciation and Verification
+  // Step 1: Initial Communication and Verification
   // Check that a MAX30105 is connected
   if (!readPartID() == MAX_30105_EXPECTEDPARTID) {
     // Error -- Part ID read from MAX30105 does not match expected part ID.
