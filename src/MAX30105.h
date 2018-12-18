@@ -140,4 +140,17 @@ class MAX30105 {
   void readRevisionID();
 
   void bitMask(uint8_t reg, uint8_t mask, uint8_t thing);
+ 
+   #define STORAGE_SIZE 4 //Each long is 4 bytes so limit this to fit on your micro
+  typedef struct Record
+  {
+    uint32_t red[STORAGE_SIZE];
+    uint32_t IR[STORAGE_SIZE];
+    uint32_t green[STORAGE_SIZE];
+    byte head;
+    byte tail;
+  } sense_struct; //This is our circular buffer of readings from the sensor
+
+  sense_struct sense;
+
 };

@@ -135,18 +135,6 @@ static const uint8_t SLOT_GREEN_PILOT = 		0x07;
 
 static const uint8_t MAX_30105_EXPECTEDPARTID = 0x15;
 
-//The MAX30105 stores up to 32 samples on the IC
-//This is additional local storage to the microcontroller
-const int STORAGE_SIZE = 4; //Each long is 4 bytes so limit this to fit on your micro
-struct Record
-{
-  uint32_t red[STORAGE_SIZE];
-  uint32_t IR[STORAGE_SIZE];
-  uint32_t green[STORAGE_SIZE];
-  byte head;
-  byte tail;
-} sense; //This is our circular buffer of readings from the sensor
-
 MAX30105::MAX30105() {
   // Constructor
 }
