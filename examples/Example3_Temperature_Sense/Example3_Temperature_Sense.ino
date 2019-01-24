@@ -19,19 +19,17 @@
 */
 
 #include <Wire.h>
-#include "MAX30105.h"
 
-#include "heartRate.h"
-
+#include "MAX30105.h"  //Get it here: http://librarymanager/All#SparkFun_MAX30105
 MAX30105 particleSensor;
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("Initializing...");
 
   // Initialize sensor
-  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
+  if (particleSensor.begin(Wire, I2C_SPEED_FAST) == false) //Use default I2C port, 400kHz speed
   {
     Serial.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);
@@ -41,6 +39,8 @@ void setup()
   //you may want to turn off the LEDs to avoid any local heating
   particleSensor.setup(0); //Configure sensor. Turn off LEDs
   //particleSensor.setup(); //Configure sensor. Use 25mA for LED drive
+
+  particleSensor.enableDIETEMPRDY(); //Enable the temp ready interrupt. This is required.
 }
 
 void loop()

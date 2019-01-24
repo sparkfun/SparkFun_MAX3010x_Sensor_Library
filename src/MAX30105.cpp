@@ -158,7 +158,7 @@ boolean MAX30105::begin(TwoWire &wirePort, uint32_t i2cSpeed, uint8_t i2caddr) {
 
   // Populate revision ID
   readRevisionID();
-
+  
   return true;
 }
 
@@ -364,6 +364,10 @@ uint8_t MAX30105::getReadPointer(void) {
 // Die Temperature
 // Returns temp in C
 float MAX30105::readTemperature() {
+	
+  //DIE_TEMP_RDY interrupt must be enabled
+  //See issue 19: https://github.com/sparkfun/SparkFun_MAX3010x_Sensor_Library/issues/19
+  
   // Step 1: Config die temperature register to take 1 temperature sample
   writeRegister8(_i2caddr, MAX30105_DIETEMPCONFIG, 0x01);
 
@@ -372,8 +376,12 @@ float MAX30105::readTemperature() {
   unsigned long startTime = millis();
   while (millis() - startTime < 100)
   {
-    uint8_t response = readRegister8(_i2caddr, MAX30105_DIETEMPCONFIG);
-    if ((response & 0x01) == 0) break; //We're done!
+    //uint8_t response = readRegister8(_i2caddr, MAX30105_DIETEMPCONFIG); //Original way
+    //if ((response & 0x01) == 0) break; //We're done!
+    
+	//Check to see if DIE_TEMP_RDY interrupt is set
+	uint8_t response = readRegister8(_i2caddr, MAX30105_INTSTAT2);
+    if ((response & MAX30105_INT_DIE_TEMP_RDY_ENABLE) > 0) break; //We're done!
     delay(1); //Let's not over burden the I2C bus
   }
   //TODO How do we want to fail? With what type of error?
@@ -381,7 +389,7 @@ float MAX30105::readTemperature() {
 
   // Step 2: Read die temperature register (integer)
   int8_t tempInt = readRegister8(_i2caddr, MAX30105_DIETEMPINT);
-  uint8_t tempFrac = readRegister8(_i2caddr, MAX30105_DIETEMPFRAC);
+  uint8_t tempFrac = readRegister8(_i2caddr, MAX30105_DIETEMPFRAC); //Causes the clearing of the DIE_TEMP_RDY interrupt
 
   // Step 3: Calculate temperature (datasheet pg. 23)
   return (float)tempInt + ((float)tempFrac * 0.0625);
