@@ -27,7 +27,7 @@ Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **[Product Repository](https://github.com/sparkfun/HTU21D_Breakout)** - Main repository (including hardware files) for the HTU21D breakout board.
+* **[Product Repository](https://github.com/sparkfun/MAX30105_Particle_Sensor_Breakout)** - Main repository (including hardware files) for the MAX30105 particl sensor breakout board.
 * **[Hookup Guide](https://learn.sparkfun.com/tutorials/max30105-particle-and-pulse-ox-sensor-hookup-guide)** - Basic hookup guide for the MAX30105 Particle Sensor breakout board.
 
 License Information
