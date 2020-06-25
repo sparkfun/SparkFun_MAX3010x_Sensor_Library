@@ -27,8 +27,10 @@ Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **[Product Repository](https://github.com/sparkfun/MAX30105_Particle_Sensor_Breakout)** - Main repository (including hardware files) for the MAX30105 particl sensor breakout board.
-* **[Hookup Guide](https://learn.sparkfun.com/tutorials/max30105-particle-and-pulse-ox-sensor-hookup-guide)** - Basic hookup guide for the MAX30105 Particle Sensor breakout board.
+* **[Product Repository (MAX30105)](https://github.com/sparkfun/MAX30105_Particle_Sensor_Breakout)** - Main repository (including hardware files) for the MAX30105 particle sensor breakout board.
+* **[Product Repository (MAX30101)](https://github.com/sparkfun/SparkFun_Photodetector_Breakout_MAX30101_Qwiic)** - Main repository (including hardware files) for the SparkFun Photodetector (MAX30101) - Qwiic.
+* **[Hookup Guide (MAX30105)](https://learn.sparkfun.com/tutorials/max30105-particle-and-pulse-ox-sensor-hookup-guide)** - Basic hookup guide for the MAX30105 Particle Sensor breakout board.
+* **[Hookup Guide (MAX30101)](https://learn.sparkfun.com/tutorials/sparkfun-photodetector-max30101-hookup-guide)** - Basic hookup guide for the SparkFun Photodetector (MAX30101) - Qwiic.
 
 License Information
 -------------------
