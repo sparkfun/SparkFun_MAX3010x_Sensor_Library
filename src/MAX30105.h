@@ -121,8 +121,9 @@ class MAX30105 {
 		@param temperature die temperature
 		@return true is temperature succesfully read, else false
   */
-  bool readTemperature(float& temperature);
+  bool readTemperatureAsync(float& temperature);
   float readTemperature(bool isAsync = false);
+  bool readTemperatureFAsync(float& temperature);
   float readTemperatureF();
 
   // Detecting ID/Revision

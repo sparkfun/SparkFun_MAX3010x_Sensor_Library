@@ -361,7 +361,7 @@ uint8_t MAX30105::getReadPointer(void) {
 }
 
 
-bool MAX30105::readTemperature(float& temperature)
+bool MAX30105::readTemperatureAsync(float& temperature)
 {
 	uint8_t isBusy = readRegister8(_i2caddr, MAX30105_DIETEMPCONFIG);
 	if (isBusy & 0x01)
@@ -428,6 +428,20 @@ float MAX30105::readTemperature(bool isAsync) {
 
   // Step 3: Calculate temperature (datasheet pg. 23)
   return (float)tempInt + ((float)tempFrac * 0.0625);
+}
+
+// Returns die temp in F Asynchronously
+bool MAX30105::readTemperatureFAsync(float& temperature)
+{
+	float temp;
+	if (!readTemperatureAsync(temp))
+	{
+		return false;
+	}
+	
+	if (temp != -999.0) temp = temp * 1.8 + 32.0;
+	temperature = temp;
+	return true;
 }
 
 // Returns die temp in F

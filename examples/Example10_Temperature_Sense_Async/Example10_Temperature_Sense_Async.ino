@@ -29,11 +29,19 @@ MAX30105 particleSensor;
 TwoWire* emotibitI2c;
 
 char input = 'a';
+uint32_t currentPrintTime;
+uint32_t lastPrintTime;
 
 void setup()
 {
   Serial.begin(9600);
   Serial.println("Initializing...");
+
+  emotibitI2c = new TwoWire(&sercom1, 11, 13); // data, clk
+  emotibitI2c->begin();
+  emotibitI2c->setClock(400000);
+  pinPeripheral(11, PIO_SERCOM);
+  pinPeripheral(13, PIO_SERCOM);
 
   EmotiBitVersionController emotibitVersionController;
   EmotiBitNvmController emotibitNvmController;
@@ -44,6 +52,7 @@ void setup()
   {
 	  emotibitNvmController.init(*emotibitI2c);
 	  emotibitVersionController.getEmotiBitVariantInfo(emotibitNvmController, emotibitVersion, sku, emotibitSerialNumber);
+	  Serial.print("Emotibit Version: "); Serial.println(EmotiBitVersionController::getHardwareVersion(emotibitVersion));
   }
   else
   {
@@ -53,11 +62,7 @@ void setup()
 		  delay(1000);
 	  }
   }
-  emotibitI2c = new TwoWire(&sercom1, 11, 13); // data, clk
-  emotibitI2c->begin();
-  emotibitI2c->setClock(400000);
-  pinPeripheral(11, PIO_SERCOM);
-  pinPeripheral(13, PIO_SERCOM);
+  
   
   // Initialize sensor
   if (particleSensor.begin(*emotibitI2c, I2C_SPEED_FAST) == false) //Use default I2C port, 400kHz speed
@@ -74,7 +79,7 @@ void setup()
   particleSensor.enableDIETEMPRDY(); //Enable the temp ready interrupt. This is required.
   Serial.println("Setup complete");
   Serial.println("Start time: " + String(millis()));
-
+  lastPrintTime = millis();
 }
 
 void loop()
@@ -83,30 +88,35 @@ void loop()
 	if (Serial.available())
 	{
 		input = Serial.read();
+		while (Serial.available())
+			Serial.read(); // clear serial buffer
 	}
 	if (input == 'a')
 	{
 		float temperature = 0;
-		if (particleSensor.readTemperature(temperature))
+		if (particleSensor.readTemperatureAsync(temperature)) // call readTemperatureFAsync for fahrenheit
 		{
-			Serial.print("[Time: " + String(millis()) + "]");
+			currentPrintTime = millis();
+			Serial.print("[Async] [Time: " + String(currentPrintTime) + "]" + "[time since last measurement: " + String(currentPrintTime - lastPrintTime) + "] ");
 			Serial.print("temperature: ");
 			Serial.println(temperature,4);
+			lastPrintTime = currentPrintTime;
 		}
 		else
 		{
-			Serial.println("[Time: " + String(millis()) + "]" + "Temp data not ready");
+			Serial.println("[Async] [Time: " + String(millis()) + "]" + "Temp data not ready");
 		}
-		delay(50);
+		delay(20); // less than 29ms, which is the conversion time of the sensor
 	}
 	else if(input == 's')
 	{
-		float temperature = particleSensor.readTemperature();
+		float temperature = particleSensor.readTemperature();// call readTemperatureF for fahrenheit
 		
-		Serial.print("[Time: " + String(millis()) + "]");
+		currentPrintTime = millis();
+		Serial.print("[Sync] [Time: " + String(currentPrintTime) + "]" + "[time since last measurement: " + String(currentPrintTime - lastPrintTime) + "] ");
 		Serial.print("temperature: ");
 		Serial.print(temperature, 4);
-
+		lastPrintTime = currentPrintTime;
 		//float temperatureF = particleSensor.readTemperatureF(); //Because I am a bad global citizen
 
 		//Serial.print(" temperatureF=");
