@@ -106,7 +106,7 @@ void loop()
 		{
 			Serial.println("[Async] [Time: " + String(millis()) + "]" + "Temp data not ready");
 		}
-		delay(20); // less than 29ms, which is the conversion time of the sensor
+		delay(10); // less than 29ms, which is the conversion time of the sensor
 	}
 	else if(input == 's')
 	{
