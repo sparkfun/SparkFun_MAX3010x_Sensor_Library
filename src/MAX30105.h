@@ -39,7 +39,10 @@
 #else
 
   //The catch-all default is 32
+  #ifndef I2C_BUFFER_LENGTH
   #define I2C_BUFFER_LENGTH 32
+  #endif
+
 
 #endif
 
