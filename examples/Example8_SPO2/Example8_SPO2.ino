@@ -49,8 +49,11 @@ int32_t spo2; //SPO2 value
 int8_t validSPO2; //indicator to show if the SPO2 calculation is valid
 int32_t heartRate; //heart rate value
 int8_t validHeartRate; //indicator to show if the heart rate calculation is valid
-
+#ifndef CONFIG_IDF_TARGET_ESP32  
 byte pulseLED = 11; //Must be on PWM pin
+#else
+byte pulseLED = 2; // Connected to the Onboard LED- Pin11 is strapping pin on ESP32
+#endif
 byte readLED = 13; //Blinks with each data read
 
 void setup()
